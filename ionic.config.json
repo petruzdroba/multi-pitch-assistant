@@ -1,0 +1,7 @@
+{
+  "name": "multi-buddy",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}
