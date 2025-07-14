@@ -7,22 +7,29 @@ export const routes: Routes = [
     component: TabsPage,
     children: [
       {
+        path: '',
+        redirectTo: '/tabs/home',
+        pathMatch: 'full',
+      },
+      {
+        path: 'home',
+        loadComponent: () =>
+          import('../components/home-screen/home-screen.component').then(
+            (m) => m.HomeScreenComponent
+          ),
+      },
+      {
         path: 'session',
         loadComponent: () =>
           import('../components/session/session.component').then(
             (m) => m.SessionComponent
           ),
       },
-      {
-        path: '',
-        redirectTo: '/tabs/session',
-        pathMatch: 'full',
-      },
     ],
   },
   {
     path: '',
-    redirectTo: '/tabs/session',
+    redirectTo: '/tabs/home',
     pathMatch: 'full',
   },
 ];
