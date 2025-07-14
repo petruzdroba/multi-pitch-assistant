@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { TabsPage } from './tabs.page';
+import { recordingGuard } from '../guards/recording.guard';
 
 export const routes: Routes = [
   {
@@ -20,6 +21,7 @@ export const routes: Routes = [
       },
       {
         path: 'session',
+        canActivate: [recordingGuard],
         loadComponent: () =>
           import('../components/session/session.component').then(
             (m) => m.SessionComponent

@@ -4,7 +4,10 @@ import { Session } from '../models/session.interface';
 @Injectable({ providedIn: 'root' })
 export class SessionService {
   private session = signal<Session>({} as Session);
+  private recording = signal<boolean>(false);
+
   readonly session$ = computed(() => this.session());
+  readonly recording$ = computed(() => this.recording());
 
   startSession(): void {
     const newSession: Session = {
@@ -21,6 +24,7 @@ export class SessionService {
     };
 
     this.session.set(newSession);
+    this.recording.set(true);
   }
 
   recordEvend(event: Event): void {}
@@ -34,5 +38,7 @@ export class SessionService {
         timeEnd: new Date(),
       };
     });
+
+    this.recording.set(false);
   }
 }
