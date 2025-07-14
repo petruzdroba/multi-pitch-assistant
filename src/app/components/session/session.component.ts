@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { IonButton, IonList, IonItem } from '@ionic/angular/standalone';
 import { CanComponentDeactivate } from 'src/app/guards/session-exit.guard';
 import { SessionService } from 'src/app/services/session.service';
+import { AlertController } from '@ionic/angular';
 
 @Component({
   selector: 'app-session',
@@ -14,6 +15,7 @@ import { SessionService } from 'src/app/services/session.service';
 export class SessionComponent implements CanComponentDeactivate {
   private sessionService = inject(SessionService);
   private routerService = inject(Router);
+  private alertCtrl = inject(AlertController);
   private sessionEnded = false;
 
   canDeactivate(): boolean {
@@ -34,10 +36,25 @@ export class SessionComponent implements CanComponentDeactivate {
     });
   }
 
-  onEndSession() {
-    console.log('Ending session...');
-    this.sessionEnded = true;
-    this.sessionService.endSession();
-    this.routerService.navigate(['/tabs/home']);
+  async onEndSession() {
+    const alert = await this.alertCtrl.create({
+      header: 'Confirm',
+      message: 'Are you sure you want to end the session?',
+      buttons: [
+        { text: 'Cancel', role: 'cancel' },
+        { text: 'End Session', role: 'confirm' },
+      ],
+    });
+
+    await alert.present();
+
+    const { role } = await alert.onDidDismiss();
+
+    if (role === 'confirm') {
+      console.log('Ending session...');
+      this.sessionEnded = true;
+      this.sessionService.endSession();
+      this.routerService.navigate(['/tabs/home']);
+    }
   }
 }
