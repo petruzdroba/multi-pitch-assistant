@@ -1,4 +1,5 @@
 import { Component, inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { IonButton } from '@ionic/angular/standalone';
 import { SessionService } from 'src/app/services/session.service';
 
@@ -10,17 +11,11 @@ import { SessionService } from 'src/app/services/session.service';
 })
 export class SessionComponent {
   private sessionService = inject(SessionService);
-  startState: boolean = false;
-
-  onStartSession() {
-    console.log('Starting session...');
-    this.startState = !this.startState;
-    this.sessionService.startSession();
-  }
+  private routerService = inject(Router);
 
   onEndSession() {
     console.log('Ending session...');
-    this.startState = !this.startState;
     this.sessionService.endSession();
+    this.routerService.navigate(['/tabs/home']);
   }
 }
