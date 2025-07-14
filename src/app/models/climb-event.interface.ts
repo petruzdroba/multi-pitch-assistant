@@ -1,6 +1,7 @@
 export interface ClimbEvent {
   id: string;
   time: Date;
+  altitude?: number;
   type:
     | 'session-started'
     | 'session-ended'

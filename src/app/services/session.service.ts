@@ -1,5 +1,6 @@
 import { computed, Injectable, signal } from '@angular/core';
 import { Session } from '../models/session.interface';
+import { ClimbEvent } from '../models/climb-event.interface';
 
 @Injectable({ providedIn: 'root' })
 export class SessionService {
@@ -27,7 +28,15 @@ export class SessionService {
     this.recording.set(true);
   }
 
-  recordEvend(event: Event): void {}
+  recordEvent(event: ClimbEvent): void {
+    this.session.update((session) => {
+      if (!session) return session;
+      return {
+        ...session,
+        events: [...session.events, event],
+      };
+    });
+  }
 
   endSession(): void {
     //here send data thru http on backend and then change tab
