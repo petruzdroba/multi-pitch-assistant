@@ -10,7 +10,7 @@ export class SessionService {
     const newSession: Session = {
       id: crypto.randomUUID(),
       timeStart: new Date(),
-      timeEnd: new Date(), // placeholder, real value set in endSession()
+      timeEnd: new Date(), // This will be updated when the session ends
       events: [
         {
           id: crypto.randomUUID(),
@@ -25,5 +25,14 @@ export class SessionService {
 
   recordEvend(event: Event): void {}
 
-  endSession(): void {}
+  endSession(): void {
+    //here send data thru http on backend and then change tab
+    this.session.update((session) => {
+      if (!session) return session;
+      return {
+        ...session,
+        timeEnd: new Date(),
+      };
+    });
+  }
 }

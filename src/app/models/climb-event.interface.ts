@@ -14,8 +14,6 @@ export interface ClimbEvent {
     | 'lead-ended'
     | 'second-started'
     | 'second-ended'
-    | 'device-paused'
-    | 'device-resumed'
     | 'error'
     | 'belay';
   notes?: string; // post climb notes

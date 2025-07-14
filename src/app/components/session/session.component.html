@@ -1,3 +1,7 @@
-<p>
-  session works!
-</p>
+<div class="main">
+  @if(!startState){
+  <ion-button fill="outline" class="btn-action" (click)="onStartSession()">Start Climbing</ion-button>
+  }@else {
+  <ion-button fill="outline" class="btn-action" (click)="onEndSession()">End Climbing</ion-button>
+  }
+</div>
