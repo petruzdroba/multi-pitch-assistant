@@ -1,6 +1,7 @@
-import { computed, Injectable, signal } from '@angular/core';
+import { computed, inject, Injectable, signal } from '@angular/core';
 import { Session } from '../models/session.interface';
 import { ClimbEvent } from '../models/climb-event.interface';
+import { LogService } from './log.service';
 
 @Injectable({ providedIn: 'root' })
 export class SessionService {
@@ -9,6 +10,8 @@ export class SessionService {
 
   readonly session$ = computed(() => this.session());
   readonly recording$ = computed(() => this.recording());
+
+  private logService = inject(LogService);
 
   startSession(): void {
     const newSession: Session = {
@@ -20,6 +23,7 @@ export class SessionService {
           id: crypto.randomUUID(),
           time: new Date(),
           type: 'session-started',
+          altitude: Math.random() * 1000, // Example altitude, add real one later
         },
       ],
     };
@@ -38,6 +42,8 @@ export class SessionService {
     });
   }
 
+  //recorder function, that will have an interval that will record altitude and time, and maybe after it will clasify events and add them
+
   endSession(): void {
     //here send data thru http on backend and then change tab
     this.session.update((session) => {
@@ -45,9 +51,12 @@ export class SessionService {
       return {
         ...session,
         timeEnd: new Date(),
+        altitude: Math.random() * 1000, // Example altitude, add real one later
       };
     });
 
     this.recording.set(false);
+    this.logService.addSession(this.session());
+    this.session.set({} as Session); // Reset session after ending
   }
 }
