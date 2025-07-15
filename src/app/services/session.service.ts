@@ -18,6 +18,7 @@ export class SessionService {
       id: crypto.randomUUID(),
       timeStart: new Date(),
       timeEnd: new Date(), // This will be updated when the session ends
+      location: 'Muntele Mare', //add if we have permission
       events: [
         {
           id: crypto.randomUUID(),
