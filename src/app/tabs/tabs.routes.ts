@@ -29,6 +29,11 @@ export const routes: Routes = [
             (m) => m.SessionComponent
           ),
       },
+      {
+        path: 'log',
+        loadComponent: () =>
+          import('../components/log/log.component').then((m) => m.LogComponent),
+      },
     ],
   },
   {

@@ -14,11 +14,12 @@ import { routes } from './app/app.routes';
 import { AppComponent } from './app/app.component';
 
 import { addIcons } from 'ionicons';
-import { home, settings } from 'ionicons/icons';
+import { home, settings, list } from 'ionicons/icons';
 
 addIcons({
   home,
   settings,
+  list,
 });
 
 bootstrapApplication(AppComponent, {
