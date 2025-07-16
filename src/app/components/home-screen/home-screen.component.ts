@@ -14,14 +14,18 @@ export class HomeScreenComponent {
   private routerService = inject(Router);
   loading: boolean = false;
 
-  onStartSession() {
+  async onStartSession() {
     console.log('Starting session...');
     this.loading = true;
 
-    setTimeout(() => {
-      this.sessionService.startSession();
+    try {
+      await this.sessionService.startSession();
       this.routerService.navigate(['/tabs/session']);
+    } catch (error) {
+      console.error('Failed to start session:', error);
+      // Optionally notify user or handle error here
+    } finally {
       this.loading = false;
-    }, 1000);
+    }
   }
 }

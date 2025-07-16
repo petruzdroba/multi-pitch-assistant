@@ -2,6 +2,7 @@ import { computed, inject, Injectable, signal } from '@angular/core';
 import { Session } from '../models/session.interface';
 import { ClimbEvent } from '../models/climb-event.interface';
 import { LogService } from './log.service';
+import { Geolocation } from '@capacitor/geolocation';
 
 @Injectable({ providedIn: 'root' })
 export class SessionService {
@@ -13,18 +14,34 @@ export class SessionService {
 
   private logService = inject(LogService);
 
-  startSession(): void {
+  async startSession(): Promise<void> {
+    let location: { latitude: number; longitude: number } | undefined =
+      undefined;
+
+    try {
+      const position = await Geolocation.getCurrentPosition();
+      location = {
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+      };
+    } catch (error) {
+      console.warn(
+        'Could not get location, starting session without location.'
+      );
+      // location remains undefined
+    }
+
     const newSession: Session = {
       id: crypto.randomUUID(),
       timeStart: new Date(),
-      timeEnd: new Date(), // This will be updated when the session ends
-      location: 'Muntele Mare', //add if we have permission
+      timeEnd: new Date(), // will update when session ends
+      location: location, // undefined if GPS failed
       events: [
         {
           id: crypto.randomUUID(),
           time: new Date(),
           type: 'session-started',
-          altitude: Math.random() * 1000, // Example altitude, add real one later
+          // no altitude
         },
       ],
     };

@@ -23,7 +23,7 @@
 
       <ion-card-content>
         @if(session.location) {
-        <p><strong>Location:</strong> {{ session.location }} </p>
+        <p><strong>Location:</strong> Lat: {{ session.location.latitude }} Long: {{session.location.longitude}} </p>
         }
         <p><strong>Duration:</strong> {{ getDuration(session.timeStart, session.timeEnd) }}</p>
       </ion-card-content>
