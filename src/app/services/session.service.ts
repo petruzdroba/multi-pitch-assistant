@@ -14,6 +14,10 @@ export class SessionService {
 
   private logService = inject(LogService);
 
+  private recorderIntervalId: any = null;
+  private readonly recorderIntervalMs = 2000; // e.g. every 2 seconds
+  private seaLevelPressure = 1013.25; // hPa
+
   async startSession(): Promise<void> {
     let location: { latitude: number; longitude: number } | undefined =
       undefined;
