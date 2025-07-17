@@ -19,16 +19,19 @@ export class SessionService {
       undefined;
 
     try {
-      const position = await Geolocation.getCurrentPosition();
-      location = {
-        latitude: position.coords.latitude,
-        longitude: position.coords.longitude,
-      };
-    } catch (error) {
-      console.warn(
-        'Could not get location, starting session without location.'
-      );
-      // location remains undefined
+      const permission = await Geolocation.requestPermissions();
+
+      if (permission.location === 'granted') {
+        const position = await Geolocation.getCurrentPosition();
+        location = {
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+        };
+      } else {
+        console.warn('Geolocation permission not granted.');
+      }
+    } catch (err) {
+      console.error('Error getting location:', err);
     }
 
     const newSession: Session = {
