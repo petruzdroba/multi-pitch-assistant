@@ -23,7 +23,7 @@ export const routes: Routes = [
       {
         path: 'session',
         canActivate: [recordingGuard],
-        canDeactivate: [SessionExitGuard],
+        // canDeactivate: [SessionExitGuard],
         loadComponent: () =>
           import('../components/session/session.component').then(
             (m) => m.SessionComponent

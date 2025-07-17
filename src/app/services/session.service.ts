@@ -63,18 +63,20 @@ export class SessionService {
   //recorder function, that will have an interval that will record altitude and time, and maybe after it will clasify events and add them
 
   endSession(): void {
-    //here send data thru http on backend and then change tab
+    console.log('SessionService: endSession called');
     this.session.update((session) => {
       if (!session) return session;
       return {
         ...session,
         timeEnd: new Date(),
-        altitude: Math.random() * 1000, // Example altitude, add real one later
+        altitude: Math.random() * 1000,
       };
     });
 
     this.recording.set(false);
     this.logService.addSession(this.session());
-    this.session.set({} as Session); // Reset session after ending
+
+    // DON'T reset immediately, let UI handle showing ended session
+    // this.session.set({} as Session);
   }
 }

@@ -12,10 +12,9 @@ import { AlertController } from '@ionic/angular';
   styleUrls: ['./session.component.css'],
   imports: [IonItem, IonList, IonButton, DatePipe, CommonModule],
 })
-export class SessionComponent implements CanComponentDeactivate {
+export class SessionComponent {
   private sessionService = inject(SessionService);
   private routerService = inject(Router);
-  private alertCtrl = inject(AlertController);
   private sessionEnded = false;
 
   canDeactivate(): boolean {
@@ -36,25 +35,12 @@ export class SessionComponent implements CanComponentDeactivate {
     });
   }
 
-  async onEndSession() {
-    const alert = await this.alertCtrl.create({
-      header: 'Confirm',
-      message: 'Are you sure you want to end the session?',
-      buttons: [
-        { text: 'Cancel', role: 'cancel' },
-        { text: 'End Session', role: 'confirm' },
-      ],
-    });
+  onEndSession() {
+    console.log('Ending session...');
+    this.sessionService.endSession();
 
-    await alert.present();
-
-    const { role } = await alert.onDidDismiss();
-
-    if (role === 'confirm') {
-      console.log('Ending session...');
-      this.sessionEnded = true;
-      this.sessionService.endSession();
+    setTimeout(() => {
       this.routerService.navigate(['/tabs/home']);
-    }
+    }, 100);
   }
 }
