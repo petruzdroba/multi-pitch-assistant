@@ -3,6 +3,8 @@ import { Session } from '../models/session.interface';
 import { ClimbEvent } from '../models/climb-event.interface';
 import { LogService } from './log.service';
 import { Geolocation } from '@capacitor/geolocation';
+import { AltitudeRecorderService } from './altitude-recorder.service';
+import { Subscription } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class SessionService {
@@ -13,10 +15,10 @@ export class SessionService {
   readonly recording$ = computed(() => this.recording());
 
   private logService = inject(LogService);
+  private altService = inject(AltitudeRecorderService);
 
-  private recorderIntervalId: any = null;
-  private readonly recorderIntervalMs = 2000; // e.g. every 2 seconds
-  private seaLevelPressure = 1013.25; // hPa
+  private altitudeSub: Subscription | null = null;
+  private lastAltitude: number | null = null;
 
   async startSession(): Promise<void> {
     let location: { latitude: number; longitude: number } | undefined =
@@ -55,6 +57,7 @@ export class SessionService {
 
     this.session.set(newSession);
     this.recording.set(true);
+    await this.startAltitudeRecording();
   }
 
   recordEvent(event: ClimbEvent): void {
@@ -76,14 +79,37 @@ export class SessionService {
       return {
         ...session,
         timeEnd: new Date(),
-        altitude: Math.random() * 1000,
+        altitude: this.lastAltitude ?? 0,
       };
     });
 
     this.recording.set(false);
     this.logService.addSession(this.session());
+    this.session.set({} as Session);
+    this.stopAltitudeRecording();
+  }
 
-    // DON'T reset immediately, let UI handle showing ended session
-    // this.session.set({} as Session);
+  private async startAltitudeRecording(): Promise<void> {
+    await this.altService.startRecording();
+
+    this.altitudeSub = this.altService.altitude$.subscribe((alt) => {
+      if (alt !== null) {
+        this.lastAltitude = alt;
+        this.recordEvent({
+          id: crypto.randomUUID(),
+          time: new Date(),
+          type: 'barometer-reading',
+          altitude: alt,
+        });
+      }
+    });
+  }
+
+  private stopAltitudeRecording(): void {
+    // unsubscribe from the stream
+    this.altitudeSub?.unsubscribe();
+    this.altitudeSub = null;
+
+    this.altService.stopRecording();
   }
 }

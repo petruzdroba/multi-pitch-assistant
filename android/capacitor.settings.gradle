@@ -20,5 +20,8 @@ project(':capacitor-keyboard').projectDir = new File('../node_modules/@capacitor
 include ':capacitor-status-bar'
 project(':capacitor-status-bar').projectDir = new File('../node_modules/@capacitor/status-bar/android')
 
+include ':kevinmarques-capacitor-barometer'
+project(':kevinmarques-capacitor-barometer').projectDir = new File('../node_modules/@kevinmarques/capacitor-barometer/android')
+
 include ':capacitor-barometer'
 project(':capacitor-barometer').projectDir = new File('../node_modules/capacitor-barometer/android')

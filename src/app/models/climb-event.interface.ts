@@ -16,6 +16,7 @@ export interface ClimbEvent {
     | 'second-started'
     | 'second-ended'
     | 'error'
-    | 'belay';
+    | 'belay'
+    | 'barometer-reading';
   notes?: string; // post climb notes
 }
