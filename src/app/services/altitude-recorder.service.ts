@@ -8,6 +8,13 @@ export class AltitudeRecorderService {
   altitude$ = this.altitudeSubject.asObservable();
 
   private barometerListener: any = null;
+  private lastEmittedAltitude: number | null = null;
+  private lastEmissionTime = 0;
+
+  private THROTTLE_INTERVAL_MS = 500;
+  private MIN_ALTITUDE_CHANGE = 1.61803398875; // minimum meters change to emit
+
+  private baselinePressure: number | null = null; // <-- baseline pressure storage
 
   async startRecording(): Promise<void> {
     try {
@@ -17,7 +24,6 @@ export class AltitudeRecorderService {
         return;
       }
 
-      // Register listener if not already registered
       if (!this.barometerListener) {
         this.barometerListener = await Barometer.addListener(
           'onPressureChange',
@@ -29,13 +35,41 @@ export class AltitudeRecorderService {
               pressure > 300 &&
               pressure < 1100
             ) {
-              const altitude = this.convertPressureToAltitude(pressure);
-              console.debug(
-                `[Barometer] Pressure: ${pressure} hPa => Altitude: ${altitude.toFixed(
-                  2
-                )} m`
-              );
-              this.altitudeSubject.next(altitude);
+              // Set baselinePressure on first reading
+              if (this.baselinePressure === null) {
+                this.baselinePressure = pressure;
+                console.debug(
+                  `[AltitudeRecorderService] Baseline pressure set to ${pressure} hPa`
+                );
+                // Emit zero altitude at baseline
+                this.altitudeSubject.next(0);
+                this.lastEmittedAltitude = 0;
+                this.lastEmissionTime = Date.now();
+                return;
+              }
+
+              // Calculate altitude relative to baseline
+              const altitude = this.convertPressureToRelativeAltitude(pressure);
+
+              const now = Date.now();
+
+              // Emit only if enough time passed and significant change detected
+              if (
+                (!this.lastEmittedAltitude ||
+                  Math.abs(altitude - this.lastEmittedAltitude) >=
+                    this.MIN_ALTITUDE_CHANGE) &&
+                now - this.lastEmissionTime >= this.THROTTLE_INTERVAL_MS
+              ) {
+                this.lastEmittedAltitude = altitude;
+                this.lastEmissionTime = now;
+
+                console.debug(
+                  `[Barometer] Pressure: ${pressure} hPa => Relative Altitude: ${altitude.toFixed(
+                    2
+                  )} m`
+                );
+                this.altitudeSubject.next(altitude);
+              }
             }
           }
         );
@@ -63,11 +97,18 @@ export class AltitudeRecorderService {
     }
 
     this.altitudeSubject.next(null);
+    this.lastEmittedAltitude = null;
+    this.lastEmissionTime = 0;
+    this.baselinePressure = null; // <-- reset baseline when stopping
   }
 
-  private convertPressureToAltitude(pressure: number): number {
-    // Standard barometric formula
-    const seaLevelPressure = 1013.25; // hPa
-    return 44330 * (1 - Math.pow(pressure / seaLevelPressure, 1 / 5.255));
+  // Calculate altitude difference relative to baseline pressure
+  private convertPressureToRelativeAltitude(currentPressure: number): number {
+    if (this.baselinePressure === null) {
+      return 0;
+    }
+    return (
+      44330 * (1 - Math.pow(currentPressure / this.baselinePressure, 1 / 5.255))
+    );
   }
 }
