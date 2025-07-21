@@ -10,11 +10,10 @@ export class AltitudeRecorderService {
   private barometerListener: any = null;
   private lastEmittedAltitude: number | null = null;
   private lastEmissionTime = 0;
+  private baselinePressure: number | null = null;
 
   private THROTTLE_INTERVAL_MS = 1000; // 1 second throttle
   private MIN_ALTITUDE_CHANGE = 0.49; // minimum meters change to emit
-
-  private baselinePressure: number | null = null; // <-- baseline pressure storage
 
   async startRecording(): Promise<void> {
     try {
@@ -51,18 +50,11 @@ export class AltitudeRecorderService {
               // Calculate altitude relative to baseline
               const altitude = this.convertPressureToRelativeAltitude(pressure);
 
+              // Always emit after throttle interval, regardless of change
               const now = Date.now();
-
-              // Emit only if enough time passed and significant change detected
-              if (
-                (!this.lastEmittedAltitude ||
-                  Math.abs(altitude - this.lastEmittedAltitude) >=
-                    this.MIN_ALTITUDE_CHANGE) &&
-                now - this.lastEmissionTime >= this.THROTTLE_INTERVAL_MS
-              ) {
+              if (now - this.lastEmissionTime >= this.THROTTLE_INTERVAL_MS) {
                 this.lastEmittedAltitude = altitude;
                 this.lastEmissionTime = now;
-
                 console.debug(
                   `[Barometer] Pressure: ${pressure} hPa => Relative Altitude: ${altitude.toFixed(
                     2

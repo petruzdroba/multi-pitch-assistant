@@ -2,28 +2,30 @@ import { Injectable } from '@angular/core';
 import { ClimbEvent } from '../models/climb-event.interface';
 import { AltitudeReading } from '../models/altitude-reading.interface';
 
-export type ClassifiedType = 'fall' | 'retreat' | null;
+export type ClassifiedType = 'fall' | 'retreat' | 'rest' | null;
 
 export interface ClassificationOptions {
   /** Minimum drop in one reading to be considered a fall (meters). */
   fallDropThreshold?: number;
   /** Minimum overall altitude change to ignore as noise (meters). */
   allowedNoiseThreshold?: number;
+  /** Maximum altitude change to be considered a rest (meters). */
+  restMaxChangeThreshold?: number;
 }
 
 @Injectable({ providedIn: 'root' })
 export class EventClassificationService {
-  // Default thresholds
-  private readonly DEFAULT_NOISE_THRESHOLD = 0.5; // changes smaller than this are noise
-  private readonly DEFAULT_FALL_DROP = 0.5; // drop >= this threshold defines a fall
-  private readonly FLAT_THRESHOLD = 1; // allowable noise when checking decline
+  private readonly DEFAULT_NOISE_THRESHOLD = 0.5;
+  private readonly DEFAULT_FALL_DROP = 0.5;
   private readonly READINGS_COUNT = 5;
+  private readonly DEFAULT_REST_MAX_CHANGE = 0.1; // 10 cm
 
   /**
-   * Classify five altitude readings into 'fall' or 'retreat'.
+   * Classify five altitude readings into 'fall', 'retreat', or 'rest'.
    * Options allow customizing thresholds:
    * - fallDropThreshold: override min single-step drop for a fall
    * - allowedNoiseThreshold: override min change considered as event
+   * - restMaxChangeThreshold: override max change for rest
    */
   classify(
     readings: AltitudeReading[],
@@ -36,34 +38,52 @@ export class EventClassificationService {
     const fallDrop = options.fallDropThreshold ?? this.DEFAULT_FALL_DROP;
     const noiseThresh =
       options.allowedNoiseThreshold ?? this.DEFAULT_NOISE_THRESHOLD;
+    const restMaxChange =
+      options.restMaxChangeThreshold ?? this.DEFAULT_REST_MAX_CHANGE;
 
-    // Compute pairwise deltas: reading[i+1] - reading[i]
+    // REST: Check if all readings are within restMaxChange of each other
+    const altitudes = readings.map((r) => r.altitude);
+    const maxAlt = Math.max(...altitudes);
+    const minAlt = Math.min(...altitudes);
+    if (maxAlt - minAlt <= restMaxChange) {
+      return 'rest';
+    }
+
+    // Compute deltas between consecutive readings
     const deltas = readings
       .slice(1)
       .map((r, i) => r.altitude - readings[i].altitude);
 
-    // Quick noise check: ignore if all changes are within noise threshold
+    // Quick noise check
     if (deltas.every((d) => Math.abs(d) < noiseThresh)) {
       return null;
     }
 
-    // 1) Detect fall: any single-step drop >= fallDrop, then no further drops >= fallDrop
-    const fallIndex = deltas.findIndex((d) => d <= -fallDrop);
-    if (fallIndex !== -1) {
-      const subsequent = deltas.slice(fallIndex + 1);
-      if (subsequent.every((d) => d > -fallDrop)) {
+    // FALL: Look for significant drop after first reading
+    // First find a climb, then a drop
+    const firstClimb = deltas[0] > noiseThresh;
+    const dropIndex = deltas.findIndex((d, i) => i > 0 && d <= -fallDrop);
+
+    if (firstClimb && dropIndex !== -1) {
+      // Check that subsequent readings don't show another big drop
+      const afterDrop = deltas.slice(dropIndex + 1);
+      if (afterDrop.every((d) => d > -fallDrop)) {
         return 'fall';
       }
     }
 
-    // 2) Detect retreat: no single drop >= fallDrop AND strictly (or flat) declining overall
-    const noBigDrops = deltas.every((d) => d > -fallDrop);
-    const monotonicOrFlat = readings
-      .slice(1)
-      .every(
-        (r, i) => r.altitude <= readings[i].altitude + this.FLAT_THRESHOLD
-      );
-    if (noBigDrops && monotonicOrFlat) {
+    // RETREAT: Check for consistent decline in first 3 readings, then flat
+    const firstThreeDeltas = deltas.slice(0, 2); // Only need first 2 deltas to check 3 readings
+    const lastDelta = deltas[2]; // Third reading's delta
+    const finalDeltas = deltas.slice(2); // Last two transitions
+
+    // First three readings must show decline (-ve deltas)
+    const consistentDecline = firstThreeDeltas.every((d) => d < -noiseThresh);
+
+    // Last two readings should be approximately equal (flat)
+    const endsFlat = finalDeltas.every((d) => Math.abs(d) <= noiseThresh);
+
+    if (consistentDecline && endsFlat) {
       return 'retreat';
     }
 
