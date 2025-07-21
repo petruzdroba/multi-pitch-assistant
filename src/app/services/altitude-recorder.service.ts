@@ -11,8 +11,8 @@ export class AltitudeRecorderService {
   private lastEmittedAltitude: number | null = null;
   private lastEmissionTime = 0;
 
-  private THROTTLE_INTERVAL_MS = 500;
-  private MIN_ALTITUDE_CHANGE = 1.61803398875; // minimum meters change to emit
+  private THROTTLE_INTERVAL_MS = 1000; // 1 second throttle
+  private MIN_ALTITUDE_CHANGE = 0.49; // minimum meters change to emit
 
   private baselinePressure: number | null = null; // <-- baseline pressure storage
 

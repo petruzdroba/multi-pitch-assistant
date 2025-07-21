@@ -5,10 +5,13 @@ import { LogService } from './log.service';
 import { Geolocation } from '@capacitor/geolocation';
 import { AltitudeRecorderService } from './altitude-recorder.service';
 import { Subscription } from 'rxjs';
+import { AltitudeReading } from '../models/altitude-reading.interface';
+import { EventClassificationService } from './event-classification.service';
 
 @Injectable({ providedIn: 'root' })
 export class SessionService {
   private session = signal<Session>({} as Session);
+  private altitudeReadings = signal<AltitudeReading[]>([] as AltitudeReading[]);
   private recording = signal<boolean>(false);
 
   readonly session$ = computed(() => this.session());
@@ -16,6 +19,7 @@ export class SessionService {
 
   private logService = inject(LogService);
   private altService = inject(AltitudeRecorderService);
+  private classifierService = inject(EventClassificationService);
 
   private altitudeSub: Subscription | null = null;
   private lastAltitude: number | null = null;
@@ -95,12 +99,15 @@ export class SessionService {
     this.altitudeSub = this.altService.altitude$.subscribe((alt) => {
       if (alt !== null) {
         this.lastAltitude = alt;
-        this.recordEvent({
-          id: crypto.randomUUID(),
-          time: new Date(),
-          type: 'barometer-reading',
-          altitude: alt,
-        });
+
+        this.altitudeReadings.update((readings) => [
+          ...readings,
+          { time: new Date(), altitude: alt },
+        ]);
+
+        if (this.altitudeReadings().length >= 5) {
+          this.classifyAltitudeEvents(this.altitudeReadings());
+        }
       }
     });
   }
@@ -111,5 +118,20 @@ export class SessionService {
     this.altitudeSub = null;
 
     this.altService.stopRecording();
+  }
+
+  private classifyAltitudeEvents(reads: AltitudeReading[]): void {
+    // Keep only the last 3 readings
+    const window = reads.slice(-5);
+    const event = this.classifierService.createEventFromReadings(window);
+
+    if (event) {
+      // Record detected event and clear all buffered readings
+      this.recordEvent(event);
+      this.altitudeReadings.set([]);
+    } else {
+      // No event: slide window by dropping oldest, keep the last two
+      this.altitudeReadings.set(window.slice(1));
+    }
   }
 }
