@@ -1,0 +1,33 @@
+<div class="main">
+  <h1 class="title">Your past adventures</h1>
+
+  <div class="session-cards">
+    @if(getSessions().length === 0) {
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>No sessions recorded yet</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        Start a new session to see your climbing adventures here!
+      </ion-card-content>
+    </ion-card>
+    }
+
+    @for(session of getSessions(); track session.id){
+    <ion-card>
+      <ion-card-header>
+        <ion-card-title>
+          Climb on {{ session.timeStart | date: 'EEE, MMMM d' }}
+        </ion-card-title>
+      </ion-card-header>
+
+      <ion-card-content>
+        @if(session.location) {
+        <p><strong>Location:</strong> Lat: {{ session.location.latitude }} Long: {{session.location.longitude}} </p>
+        }
+        <p><strong>Duration:</strong> {{ getDuration(session.timeStart, session.timeEnd) }}</p>
+      </ion-card-content>
+    </ion-card>
+    }
+  </div>
+</div>

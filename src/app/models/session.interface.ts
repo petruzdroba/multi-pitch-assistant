@@ -7,8 +7,9 @@ export interface Session {
   events: ClimbEvent[];
 
   // Added after session ends:
+  name?:string;//To be added instead of climb on date
   type?: 'sport' | 'trad' | 'undefined';
-  location?: string;
+  location?: { latitude: number; longitude: number };
   notes?: string;
   completed?: boolean;
   pitchCount?: number;
