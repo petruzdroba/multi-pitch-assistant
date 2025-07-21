@@ -20,6 +20,53 @@ export class EventClassificationService {
   private readonly READINGS_COUNT = 5;
   private readonly DEFAULT_REST_MAX_CHANGE = 0.1; // 10 cm
 
+  private detectRest(
+    readings: AltitudeReading[],
+    restMaxChange: number
+  ): boolean {
+    // Check if all consecutive pairs are within rest threshold
+    for (let i = 1; i < readings.length; i++) {
+      const diff = Math.abs(readings[i].altitude - readings[i - 1].altitude);
+      if (diff > restMaxChange) {
+        return false;
+      }
+    }
+
+    // Also verify total range is within threshold
+    const altitudes = readings.map((r) => r.altitude);
+    const maxAlt = Math.max(...altitudes);
+    const minAlt = Math.min(...altitudes);
+    return maxAlt - minAlt <= restMaxChange;
+  }
+
+  private detectFall(
+    deltas: number[],
+    fallDrop: number,
+    noiseThresh: number
+  ): boolean {
+    const firstClimb = deltas[0] > noiseThresh;
+    const dropIndex = deltas.findIndex((d, i) => i > 0 && d <= -fallDrop);
+
+    if (!firstClimb || dropIndex === -1) return false;
+
+    const afterDrop = deltas.slice(dropIndex + 1);
+    return afterDrop.every((d) => d > -fallDrop);
+  }
+
+  private detectRetreat(deltas: number[], noiseThresh: number): boolean {
+    // First three deltas must show decline
+    const firstThreeDeltas = deltas.slice(0, 3);
+    const finalDeltas = deltas.slice(3);
+
+    // Check for consistent decline in first three deltas
+    const consistentDecline = firstThreeDeltas.every((d) => d < 0);
+
+    // Last deltas should be flat (within noise threshold)
+    const endsFlat = finalDeltas.every((d) => Math.abs(d) <= noiseThresh);
+
+    return consistentDecline && endsFlat;
+  }
+
   /**
    * Classify five altitude readings into 'fall', 'retreat', or 'rest'.
    * Options allow customizing thresholds:
@@ -41,50 +88,29 @@ export class EventClassificationService {
     const restMaxChange =
       options.restMaxChangeThreshold ?? this.DEFAULT_REST_MAX_CHANGE;
 
-    // REST: Check if all readings are within restMaxChange of each other
-    const altitudes = readings.map((r) => r.altitude);
-    const maxAlt = Math.max(...altitudes);
-    const minAlt = Math.min(...altitudes);
-    if (maxAlt - minAlt <= restMaxChange) {
-      return 'rest';
+    // Check rest first and ensure all readings are within 1 second of each other
+    if (this.detectRest(readings, restMaxChange)) {
+      const timeSpan =
+        Number(readings[readings.length - 1].time) - Number(readings[0].time);
+      if (timeSpan <= 5000) {
+        // 5 seconds in milliseconds
+        return 'rest';
+      }
     }
 
-    // Compute deltas between consecutive readings
     const deltas = readings
       .slice(1)
       .map((r, i) => r.altitude - readings[i].altitude);
 
-    // Quick noise check
-    if (deltas.every((d) => Math.abs(d) < noiseThresh)) {
-      return null;
-    }
+    const isFall = this.detectFall(deltas, fallDrop, noiseThresh);
+    const isRetreat = this.detectRetreat(deltas, noiseThresh);
 
-    // FALL: Look for significant drop after first reading
-    // First find a climb, then a drop
-    const firstClimb = deltas[0] > noiseThresh;
-    const dropIndex = deltas.findIndex((d, i) => i > 0 && d <= -fallDrop);
-
-    if (firstClimb && dropIndex !== -1) {
-      // Check that subsequent readings don't show another big drop
-      const afterDrop = deltas.slice(dropIndex + 1);
-      if (afterDrop.every((d) => d > -fallDrop)) {
-        return 'fall';
-      }
-    }
-
-    // RETREAT: Check for consistent decline in first 3 readings, then flat
-    const firstThreeDeltas = deltas.slice(0, 2); // Only need first 2 deltas to check 3 readings
-    const lastDelta = deltas[2]; // Third reading's delta
-    const finalDeltas = deltas.slice(2); // Last two transitions
-
-    // First three readings must show decline (-ve deltas)
-    const consistentDecline = firstThreeDeltas.every((d) => d < -noiseThresh);
-
-    // Last two readings should be approximately equal (flat)
-    const endsFlat = finalDeltas.every((d) => Math.abs(d) <= noiseThresh);
-
-    if (consistentDecline && endsFlat) {
-      return 'retreat';
+    if (isFall && !isRetreat) return 'fall';
+    if (isRetreat && !isFall) return 'retreat';
+    if (isRetreat && isFall) {
+      // If both patterns match, prefer retreat if the drops are smaller
+      const maxDrop = Math.min(...deltas);
+      return Math.abs(maxDrop) <= fallDrop ? 'retreat' : 'fall';
     }
 
     return null;

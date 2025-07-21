@@ -50,7 +50,7 @@ export class AltitudeRecorderService {
               // Calculate altitude relative to baseline
               const altitude = this.convertPressureToRelativeAltitude(pressure);
 
-              // Always emit after throttle interval, regardless of change
+              // Always emit after throttle interval
               const now = Date.now();
               if (now - this.lastEmissionTime >= this.THROTTLE_INTERVAL_MS) {
                 this.lastEmittedAltitude = altitude;
