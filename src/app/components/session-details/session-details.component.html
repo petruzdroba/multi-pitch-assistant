@@ -3,6 +3,47 @@
   <ion-progress-bar type="indeterminate"></ion-progress-bar>
   <ion-button size="large" color="danger" fill="outline" class="btn-cancel" (click)="onCancel()">Cancel</ion-button>
   }@else {
+  <div class="header-section">
+    <div class="greeting-header">
+      <h1 class="greeting-title">Edit your session</h1>
+      <p class="greeting-subtext">{{ loadedSession()?.timeStart | date: 'EEEE, MMMM d, y, H:mm'}}</p>
+    </div>
 
+    <ion-item>
+      <ion-input label="Session name" [value]="loadedSession()?.name" labelPlacement="floating"
+        placeholder="Enter text">
+      </ion-input>
+    </ion-item>
+  </div>
+
+  <div class="scrollable-content">
+    <ion-list class="event-list">
+      @for(event of loadedSession()?.events;track event.id){
+      <div class="event-item">
+        <ion-item class="event-item">
+          <h2 class="event-type">{{ event.type }}</h2>
+          <div class="event-extra">
+            <p class="event-time">{{ event.time | date:'dd/MM/yyyy, HH:mm' }}</p>
+            @if(event.altitude !== undefined){
+            <p class="event-altitude" color="primary">Altitude: {{ event.altitude| number:'1.2-2' }} m</p>
+            }
+          </div>
+        </ion-item>
+      </div>
+      }
+    </ion-list>
+  </div>
   }
+
+  <ion-fab class="btn-submit" vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button>
+      test Float
+    </ion-fab-button>
+  </ion-fab>
+
+  <ion-fab vertical="top" horizontal="end" slot="fixed">
+    <ion-fab-button size="small" color="danger" (click)="onCancel()">
+      test close
+    </ion-fab-button>
+  </ion-fab>
 </div>

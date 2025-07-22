@@ -2,13 +2,32 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Session } from 'src/app/models/session.interface';
 import { LogService } from 'src/app/services/log.service';
-import { IonProgressBar, IonButton } from '@ionic/angular/standalone';
+import {
+  IonProgressBar,
+  IonButton,
+  IonItem,
+  IonInput,
+  IonList,
+  IonFab,
+  IonFabButton,
+} from '@ionic/angular/standalone';
+import { CommonModule, DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-session-details',
   templateUrl: './session-details.component.html',
   styleUrls: ['./session-details.component.css'],
-  imports: [IonProgressBar, IonButton],
+  imports: [
+    IonProgressBar,
+    IonButton,
+    IonInput,
+    IonItem,
+    DatePipe,
+    IonList,
+    CommonModule,
+    IonFab,
+    IonFabButton,
+  ],
 })
 export class SessionDetailsComponent implements OnInit {
   private logService = inject(LogService);
