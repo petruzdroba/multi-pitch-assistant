@@ -18,25 +18,17 @@ export class EventClassificationService {
   private readonly DEFAULT_NOISE_THRESHOLD = 0.5;
   private readonly DEFAULT_FALL_DROP = 0.5;
   private readonly READINGS_COUNT = 5;
-  private readonly DEFAULT_REST_MAX_CHANGE = 0.1; // 10 cm
+  private readonly DEFAULT_REST_MAX_CHANGE = 0.3; // 5cm max difference for rest
 
   private detectRest(
     readings: AltitudeReading[],
     restMaxChange: number
   ): boolean {
-    // Check if all consecutive pairs are within rest threshold
-    for (let i = 1; i < readings.length; i++) {
-      const diff = Math.abs(readings[i].altitude - readings[i - 1].altitude);
-      if (diff > restMaxChange) {
-        return false;
-      }
-    }
-
-    // Also verify total range is within threshold
-    const altitudes = readings.map((r) => r.altitude);
-    const maxAlt = Math.max(...altitudes);
-    const minAlt = Math.min(...altitudes);
-    return maxAlt - minAlt <= restMaxChange;
+    // For rest, all readings should be very close to first reading
+    const firstAlt = readings[0].altitude;
+    return readings.every(
+      (r) => Math.abs(r.altitude - firstAlt) <= restMaxChange
+    );
   }
 
   private detectFall(
