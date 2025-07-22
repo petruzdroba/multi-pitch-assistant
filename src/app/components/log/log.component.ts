@@ -8,6 +8,7 @@ import {
   IonCardHeader,
   IonCardContent,
 } from '@ionic/angular/standalone';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-log',
@@ -17,6 +18,7 @@ import {
 })
 export class LogComponent {
   private logService = inject(LogService);
+  private routerService = inject(Router);
 
   getSessions(): Session[] {
     return this.logService.logs$();
@@ -36,5 +38,9 @@ export class LogComponent {
         (minutes ? ` ${minutes} min` : '')
       );
     }
+  }
+
+  onOpenSession(sessionId: string) {
+    this.routerService.navigate(['/tabs/session-details', sessionId]);
   }
 }

@@ -11,4 +11,8 @@ export class LogService {
     this.logs.update((currentLogs) => [...currentLogs, session]);
     //here add to backend
   }
+
+  getSessionById(id: string): Session | undefined {
+    return this.logs().find((session) => session.id === id);
+  }
 }

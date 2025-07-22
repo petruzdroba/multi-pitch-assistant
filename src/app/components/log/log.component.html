@@ -14,7 +14,7 @@
     }
 
     @for(session of getSessions(); track session.id){
-    <ion-card>
+    <ion-card (click)="onOpenSession(session.id)">
       <ion-card-header>
         <ion-card-title>
           Climb on {{ session.timeStart | date: 'EEE, MMMM d' }}

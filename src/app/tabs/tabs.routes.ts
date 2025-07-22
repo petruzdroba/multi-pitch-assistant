@@ -34,6 +34,13 @@ export const routes: Routes = [
         loadComponent: () =>
           import('../components/log/log.component').then((m) => m.LogComponent),
       },
+      {
+        path: 'session-details/:id',
+        loadComponent: () =>
+          import(
+            '../components/session-details/session-details.component'
+          ).then((m) => m.SessionDetailsComponent),
+      },
     ],
   },
   {
