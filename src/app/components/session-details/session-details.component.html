@@ -1,1 +1,8 @@
-{{loadedSession()?.id}}
+<div class="main">
+  @if(loadedSession() === undefined){
+  <ion-progress-bar type="indeterminate"></ion-progress-bar>
+  <ion-button size="large" color="danger" fill="outline" class="btn-cancel" (click)="onCancel()">Cancel</ion-button>
+  }@else {
+
+  }
+</div>
