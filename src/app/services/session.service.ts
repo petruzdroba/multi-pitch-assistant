@@ -78,6 +78,14 @@ export class SessionService {
 
   endSession(): void {
     console.log('SessionService: endSession called');
+
+    const endEvent: ClimbEvent = {
+      id: crypto.randomUUID(),
+      time: new Date(),
+      type: 'session-ended',
+    };
+    this.recordEvent(endEvent);
+
     this.session.update((session) => {
       if (!session) return session;
       return {

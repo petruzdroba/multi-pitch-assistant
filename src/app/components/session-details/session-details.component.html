@@ -20,6 +20,8 @@
     <ion-list class="event-list">
       @for(event of loadedSession()?.events;track event.id){
       <div class="event-item">
+
+        @if($first || $last) {
         <ion-item class="event-item">
           <h2 class="event-type">{{ event.type }}</h2>
           <div class="event-extra">
@@ -29,21 +31,49 @@
             }
           </div>
         </ion-item>
+        }@else {
+        <ion-item-sliding #slidingItem>
+          <!-- Main content -->
+          <ion-item>
+            <h2 class="event-type">{{ event.type }}</h2>
+            <div class="event-extra">
+              <p class="event-time">{{ event.time | date:'dd/MM/yyyy, HH:mm' }}</p>
+              @if(event.altitude !== undefined){
+              <p class="event-altitude" color="primary">Altitude: {{ event.altitude| number:'1.2-2' }} m</p>
+              }
+            </div>
+          </ion-item>
+
+          <!-- Left swipe: Edit -->
+          <ion-item-options side="start">
+            <ion-item-option color="medium">
+              <ion-icon slot="icon-only" name="create"></ion-icon>
+            </ion-item-option>
+          </ion-item-options>
+
+          <!-- Right swipe: Delete -->
+          <ion-item-options side="end">
+            <ion-item-option color="danger">
+              <ion-icon slot="icon-only" name="trash"></ion-icon>
+            </ion-item-option>
+          </ion-item-options>
+        </ion-item-sliding>
+        }
+
       </div>
       }
     </ion-list>
   </div>
-  }
-
   <ion-fab class="btn-submit" vertical="bottom" horizontal="end" slot="fixed">
     <ion-fab-button>
-      test Float
+      <ion-icon name="checkmark"></ion-icon>
     </ion-fab-button>
   </ion-fab>
 
   <ion-fab vertical="top" horizontal="end" slot="fixed">
     <ion-fab-button size="small" color="danger" (click)="onCancel()">
-      test close
+      <ion-icon name="close"></ion-icon>
     </ion-fab-button>
   </ion-fab>
+  }
 </div>

@@ -10,6 +10,10 @@ import {
   IonList,
   IonFab,
   IonFabButton,
+  IonIcon,
+  IonItemSliding,
+  IonItemOptions,
+  IonItemOption,
 } from '@ionic/angular/standalone';
 import { CommonModule, DatePipe } from '@angular/common';
 
@@ -27,6 +31,10 @@ import { CommonModule, DatePipe } from '@angular/common';
     CommonModule,
     IonFab,
     IonFabButton,
+    IonIcon,
+    IonItemSliding,
+    IonItemOptions,
+    IonItemOption,
   ],
 })
 export class SessionDetailsComponent implements OnInit {
@@ -39,7 +47,6 @@ export class SessionDetailsComponent implements OnInit {
   ngOnInit() {
     this.route.params.subscribe((params) => {
       const sessionId = params['id'];
-      // Load session details using the ID
       this.loadedSession.set(this.logService.getSessionById(sessionId));
       if (!this.loadedSession()) {
         console.error('Session not found:', sessionId);

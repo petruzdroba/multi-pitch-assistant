@@ -14,13 +14,9 @@ import { routes } from './app/app.routes';
 import { AppComponent } from './app/app.component';
 
 import { addIcons } from 'ionicons';
-import { home, settings, list } from 'ionicons/icons';
+import * as allIcons from 'ionicons/icons';
 
-addIcons({
-  home,
-  settings,
-  list,
-});
+addIcons({ ...allIcons });
 
 bootstrapApplication(AppComponent, {
   providers: [
