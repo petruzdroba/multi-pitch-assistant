@@ -17,9 +17,11 @@
     <ion-card (click)="onOpenSession(session.id)">
       <ion-card-header>
         <ion-card-title>
-          Climb on {{ session.timeStart | date: 'EEE, MMMM d' }}
+          {{ session.name ? (session.name + ' on ' + (session.timeStart | date: 'EEE, MMMM d')) : ('Climb on ' +
+          (session.timeStart | date: 'EEE, MMMM d')) }}
         </ion-card-title>
       </ion-card-header>
+
 
       <ion-card-content>
         @if(session.location) {

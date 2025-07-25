@@ -31,6 +31,17 @@ export class LogService {
     //here update to backend
   }
 
+  updateSession(updatedSession: Session): void {
+    this.logs.update((sessions) =>
+      sessions.map((session) =>
+        session.id === updatedSession.id
+          ? { ...session, ...updatedSession }
+          : session
+      )
+    );
+    // Add backend update code
+  }
+
   getSessionById(id: string): Session | undefined {
     return this.logs().find((session) => session.id === id);
   }

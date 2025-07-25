@@ -10,10 +10,12 @@
     </div>
 
     <ion-item>
-      <ion-input label="Session name" [value]="loadedSession()?.name" labelPlacement="floating"
+      <ion-input [(ngModel)]="name" (ngModelChange)="onNameChange()" label="Session name" labelPlacement="floating"
         placeholder="Enter text">
       </ion-input>
     </ion-item>
+
+
   </div>
 
   <div class="scrollable-content">
@@ -65,7 +67,7 @@
     </ion-list>
   </div>
   <ion-fab class="btn-submit" vertical="bottom" horizontal="end" slot="fixed">
-    <ion-fab-button>
+    <ion-fab-button (click)="onSubmit()">
       <ion-icon name="checkmark"></ion-icon>
     </ion-fab-button>
   </ion-fab>

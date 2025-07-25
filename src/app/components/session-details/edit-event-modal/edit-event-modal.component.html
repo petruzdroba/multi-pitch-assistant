@@ -3,7 +3,7 @@
     <ion-buttons slot="start">
       <ion-button color="medium" (click)="cancel()">Cancel</ion-button>
     </ion-buttons>
-    <ion-title>Welcome</ion-title>
+    <ion-title>Edit event</ion-title>
     <ion-buttons slot="end">
       <ion-button (click)="confirm()" [strong]="true">Confirm</ion-button>
     </ion-buttons>
@@ -13,16 +13,36 @@
 <ion-content class="ion-padding">
   <form #eventForm="ngForm">
     <ion-item>
-      <ion-label position="floating">Type</ion-label>
-      <ion-input [(ngModel)]="editableEvent.type" name="type"></ion-input>
+      <ion-label>Event Type</ion-label>
+      <ion-select [(ngModel)]="editableEvent.type" name="type">
+        <ion-select-option value="fall">fall</ion-select-option>
+        <ion-select-option value="fall-arrested">fall-arrested</ion-select-option>
+        <ion-select-option value="pitch-changed">pitch-changed</ion-select-option>
+        <ion-select-option value="rest">rest</ion-select-option>
+        <ion-select-option value="retreat">retreat</ion-select-option>
+        <ion-select-option value="manual-note">manual-note</ion-select-option>
+        <ion-select-option value="lead-started">lead-started</ion-select-option>
+        <ion-select-option value="lead-ended">lead-ended</ion-select-option>
+        <ion-select-option value="second-started">second-started</ion-select-option>
+        <ion-select-option value="second-ended">second-ended</ion-select-option>
+        <ion-select-option value="belay">belay</ion-select-option>
+        <ion-select-option value="barometer-reading">barometer-reading</ion-select-option>
+      </ion-select>
     </ion-item>
-    <ion-item>
+
+    <!-- <ion-item>
       <ion-label position="floating">Time</ion-label>
       <ion-input [(ngModel)]="editableEvent.time" name="time" type="datetime-local"></ion-input>
-    </ion-item>
+    </ion-item> -->
     <ion-item>
       <ion-label position="floating">Altitude</ion-label>
       <ion-input [(ngModel)]="editableEvent.altitude" name="altitude" type="number"></ion-input>
     </ion-item>
+
+    <ion-item>
+      <ion-label position="floating">Notes (optional)</ion-label>
+      <ion-textarea [(ngModel)]="editableEvent.notes" name="notes" auto-grow="true" rows="3"></ion-textarea>
+    </ion-item>
+
   </form>
 </ion-content>

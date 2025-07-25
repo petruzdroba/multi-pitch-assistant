@@ -49,6 +49,8 @@ export class SessionDetailsComponent implements OnInit {
   private modalController = inject(ModalController);
 
   loadedSession = signal<Session | undefined>(undefined);
+  name: string = '';
+
   constructor(private route: ActivatedRoute) {}
 
   async openModal(event: ClimbEvent | undefined = undefined) {
@@ -78,9 +80,10 @@ export class SessionDetailsComponent implements OnInit {
   ngOnInit() {
     this.route.params.subscribe((params) => {
       const sessionId = params['id'];
-      this.loadedSession.set(this.logService.getSessionById(sessionId));
-      if (!this.loadedSession()) {
-        console.error('Session not found:', sessionId);
+      const session = this.logService.getSessionById(sessionId);
+      this.loadedSession.set(session);
+      if (session?.name) {
+        this.name = session.name;
       }
     });
   }
@@ -89,7 +92,27 @@ export class SessionDetailsComponent implements OnInit {
     this.routerService.navigate(['/tabs/log'], { replaceUrl: true });
   }
 
-  onEdit(event: ClimbEvent) {}
+  onNameChange() {
+    const session = this.loadedSession();
+    if (session) {
+      this.loadedSession.set({ ...session, name: this.name });
+      // Optionally update backend here too
+    }
+  }
 
   onDelete(event: ClimbEvent) {}
+
+  onSubmit() {
+    const session = this.loadedSession();
+    if (!session) return;
+
+    const updatedSession: Session = {
+      ...session,
+      name: this.name,
+    };
+
+    this.loadedSession.set(updatedSession);
+    this.logService.updateSession(updatedSession);
+    this.routerService.navigate(['/tabs/log'], { replaceUrl: true });
+  }
 }
