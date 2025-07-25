@@ -54,14 +54,24 @@ export class SessionDetailsComponent implements OnInit {
   async openModal(event: ClimbEvent | undefined = undefined) {
     const modal = await this.modalController.create({
       component: EditEventModalComponent,
-      componentProps: { event: event },
+      componentProps: { event: event, sessionId: this.loadedSession()?.id },
     });
     modal.present();
-    const { data, role } = await modal.onWillDismiss();
+    const { data: updatedEvent, role } = await modal.onWillDismiss();
 
     if (role === 'confirm') {
-      // this.message = `Hello, ${data}!`;
-      console.log('modal data:', data);
+      const session = this.loadedSession();
+      if (session) {
+        const updatedSession: Session = {
+          ...session,
+          events: session.events.map((e) =>
+            e.id === updatedEvent.id ? { ...e, ...updatedEvent } : e
+          ),
+        };
+
+        this.loadedSession.set(updatedSession);
+        this.logService.updateEvent(updatedEvent, session.id);
+      }
     }
   }
 

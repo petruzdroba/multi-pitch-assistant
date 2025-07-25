@@ -1,5 +1,6 @@
 import { computed, Injectable, signal } from '@angular/core';
 import { Session } from '../models/session.interface';
+import { ClimbEvent } from '../models/climb-event.interface';
 
 @Injectable({ providedIn: 'root' })
 export class LogService {
@@ -10,6 +11,24 @@ export class LogService {
   addSession(session: Session): void {
     this.logs.update((currentLogs) => [...currentLogs, session]);
     //here add to backend
+  }
+
+  updateEvent(event: ClimbEvent, sessionId: string): void {
+    this.logs.update((currentLogs) => {
+      return currentLogs.map((session) => {
+        if (session.id === sessionId) {
+          return {
+            ...session,
+            events: session.events.map((e) =>
+              e.id === event.id ? { ...e, ...event } : e
+            ),
+          };
+        }
+        return session;
+      });
+    });
+
+    //here update to backend
   }
 
   getSessionById(id: string): Session | undefined {

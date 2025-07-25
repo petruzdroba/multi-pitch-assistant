@@ -9,8 +9,20 @@
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
+
 <ion-content class="ion-padding">
-  <ion-item>
-    {{event?.id}}
-  </ion-item>
+  <form #eventForm="ngForm">
+    <ion-item>
+      <ion-label position="floating">Type</ion-label>
+      <ion-input [(ngModel)]="editableEvent.type" name="type"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label position="floating">Time</ion-label>
+      <ion-input [(ngModel)]="editableEvent.time" name="time" type="datetime-local"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label position="floating">Altitude</ion-label>
+      <ion-input [(ngModel)]="editableEvent.altitude" name="altitude" type="number"></ion-input>
+    </ion-item>
+  </form>
 </ion-content>
