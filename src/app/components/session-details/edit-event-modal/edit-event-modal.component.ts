@@ -1,20 +1,57 @@
 import { LogService } from 'src/app/services/log.service';
-import { Component, inject, Input, OnInit } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { Component, inject, Input, NgModule, OnInit } from '@angular/core';
+import { FormsModule, NgModel } from '@angular/forms';
 
-import { ModalController } from '@ionic/angular/standalone';
+import {
+  IonSelectOption,
+  IonSelect,
+  ModalController,
+  IonItem,
+  IonLabel,
+  IonContent,
+  IonButton,
+  IonTitle,
+  IonButtons,
+  IonToolbar,
+  IonTextarea,
+  IonInput,
+  IonHeader,
+} from '@ionic/angular/standalone';
 import { ClimbEvent } from 'src/app/models/climb-event.interface';
 import { IonicModule } from '@ionic/angular';
 
 @Component({
+  standalone: true,
   selector: 'app-modal-example',
   templateUrl: 'edit-event-modal.component.html',
-  imports: [FormsModule, IonicModule],
+  imports: [
+    FormsModule,
+    // IonicModule,
+    IonSelect,
+    IonSelectOption,
+    IonItem,
+    IonLabel,
+    IonContent,
+    IonButton,
+    IonTitle,
+    IonButtons,
+    IonToolbar,
+    IonHeader,
+    IonTextarea,
+    IonInput,
+  ],
 })
 export class EditEventModalComponent implements OnInit {
   @Input() event: ClimbEvent | undefined;
   @Input() sessionId: string | undefined;
-  editableEvent!: ClimbEvent;
+  editableEvent: ClimbEvent = {
+    id: 'asd',
+    time: new Date(),
+    type: 'error',
+    altitude: 0,
+    notes: '',
+    // ... initialize all required ClimbEvent fields with sensible defaults here
+  };
 
   private logService = inject(LogService);
 
