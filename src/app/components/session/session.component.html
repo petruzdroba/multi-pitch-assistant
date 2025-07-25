@@ -1,0 +1,19 @@
+<div class="main">
+  <ion-button size="large" fill="outline" class="btn-action" (click)="onEndSession()">End Climbing</ion-button>
+  <button (click)="test()">Add test event</button>
+  <ion-list class="event-list">
+    @for(event of getEvents();track event.id){
+    <div class="event-item">
+      <ion-item class="event-item">
+        <h2 class="event-type">{{ event.type }}</h2>
+        <div class="event-extra">
+          <p class="event-time">{{ event.time | date:'dd/MM/yyyy, HH:mm' }}</p>
+          @if(event.altitude !== undefined){
+          <p class="event-altitude" color="primary">Altitude: {{ event.altitude| number:'1.2-2' }} m</p>
+          }
+        </div>
+      </ion-item>
+    </div>
+    }
+  </ion-list>
+</div>

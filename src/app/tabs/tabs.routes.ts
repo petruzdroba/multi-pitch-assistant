@@ -1,5 +1,7 @@
 import { Routes } from '@angular/router';
 import { TabsPage } from './tabs.page';
+import { recordingGuard } from '../guards/recording.guard';
+import { SessionExitGuard } from '../guards/session-exit.guard';
 
 export const routes: Routes = [
   {
@@ -7,30 +9,43 @@ export const routes: Routes = [
     component: TabsPage,
     children: [
       {
-        path: 'tab1',
-        loadComponent: () =>
-          import('../tab1/tab1.page').then((m) => m.Tab1Page),
-      },
-      {
-        path: 'tab2',
-        loadComponent: () =>
-          import('../tab2/tab2.page').then((m) => m.Tab2Page),
-      },
-      {
-        path: 'tab3',
-        loadComponent: () =>
-          import('../tab3/tab3.page').then((m) => m.Tab3Page),
-      },
-      {
         path: '',
-        redirectTo: '/tabs/tab1',
+        redirectTo: '/tabs/home',
         pathMatch: 'full',
+      },
+      {
+        path: 'home',
+        loadComponent: () =>
+          import('../components/home-screen/home-screen.component').then(
+            (m) => m.HomeScreenComponent
+          ),
+      },
+      {
+        path: 'session',
+        canActivate: [recordingGuard],
+        canDeactivate: [SessionExitGuard],
+        loadComponent: () =>
+          import('../components/session/session.component').then(
+            (m) => m.SessionComponent
+          ),
+      },
+      {
+        path: 'log',
+        loadComponent: () =>
+          import('../components/log/log.component').then((m) => m.LogComponent),
+      },
+      {
+        path: 'session-details/:id',
+        loadComponent: () =>
+          import(
+            '../components/session-details/session-details.component'
+          ).then((m) => m.SessionDetailsComponent),
       },
     ],
   },
   {
     path: '',
-    redirectTo: '/tabs/tab1',
+    redirectTo: '/tabs/home',
     pathMatch: 'full',
   },
 ];
