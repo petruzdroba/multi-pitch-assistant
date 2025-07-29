@@ -1,6 +1,17 @@
 @echo off
-REM ensure we’re in the project root
+REM Ensure we’re in the project root
 cd /d "%~dp0"
+
+REM Check if environment.prod.ts exists, if not create a mock one
+if not exist "src\environments\environment.prod.ts" (
+  echo ⚠️  src\environments\environment.prod.ts not found. Creating a mock environment file...
+  if not exist "src\environments" mkdir src\environments
+  (
+    echo export const environment = {
+    echo   production: true
+    echo };
+  ) > src\environments\environment.prod.ts
+)
 
 REM 1) Build the Ionic web assets
 echo 🚧 Building Ionic...
