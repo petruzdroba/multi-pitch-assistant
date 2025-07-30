@@ -35,3 +35,26 @@
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
 @import '@ionic/angular/css/palettes/dark.system.css';
+
+ion-app, ion-router-outlet {
+  background: var(--background-color);
+}
+
+ion-tab-bar {
+  --background: var(--background-dark-color);
+  --color: var(--text-color);
+}
+
+ion-tab-button {
+  --color-selected: var(--primary-hover-color);
+  color: var(--primary-color);
+  background: var(--background-dark-color);
+  transition: all 0.6s ease;
+}
+
+ion-button.btn-action[fill="outline"] {
+  --border-color: var(--primary-color);
+  --color: var(--primary-color);
+  --background: transparent;
+  transition: all 0.6s ease;
+}
