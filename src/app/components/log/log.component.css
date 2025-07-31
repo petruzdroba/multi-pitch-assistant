@@ -1,14 +1,24 @@
+.main{
+  display: flex;
+  flex-direction: column;
+  align-content: center;
+  height: 100%;
+  width: 100%;
+  padding: 0;
+}
+
 .title {
   font-size: 1.8rem;
   font-weight: bold;
   margin-bottom: 8px;
-  padding: 0 16px 24px 16px;
+  color: var(--text-color);
+  justify-content: left;
+  margin-left: 5%;
 }
 
 .session-cards {
   max-height: 99vh;
   overflow-y: auto;
-  padding-right: 0.5rem;
 
   /* Hide scrollbar (iOS & Android WebView) */
   -webkit-overflow-scrolling: touch;
@@ -19,10 +29,23 @@
 }
 
 .session-cards ion-card {
+  align-items: center;
   margin-bottom: 1rem;
 }
 
 .session-cards::-webkit-scrollbar {
   display: none;
   /* Chrome, Safari, Android */
+}
+
+.session-title{
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: var(--text-color);
+}
+
+.session-subtext {
+  font-size: 0.9rem;
+  color: var(--text-hover-color);
+  padding: 0 16px;
 }

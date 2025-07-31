@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, inject, ViewEncapsulation } from '@angular/core';
 import { Session } from 'src/app/models/session.interface';
 import { LogService } from 'src/app/services/log.service';
 import {
@@ -14,6 +14,7 @@ import { Router } from '@angular/router';
   selector: 'app-log',
   templateUrl: './log.component.html',
   styleUrls: ['./log.component.css'],
+  encapsulation: ViewEncapsulation.None,
   imports: [IonCardContent, IonCardHeader, IonCardTitle, IonCard, DatePipe],
 })
 export class LogComponent {

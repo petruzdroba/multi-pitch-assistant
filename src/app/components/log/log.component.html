@@ -16,14 +16,14 @@
     @for(session of getSessions(); track session.id){
     <ion-card (click)="onOpenSession(session.id)">
       <ion-card-header>
-        <ion-card-title>
+        <ion-card-title class="session-title">
           {{ session.name ? (session.name + ' on ' + (session.timeStart | date: 'EEE, MMMM d')) : ('Climb on ' +
           (session.timeStart | date: 'EEE, MMMM d')) }}
         </ion-card-title>
       </ion-card-header>
 
 
-      <ion-card-content>
+      <ion-card-content class="session-subtext">
         @if(session.location) {
         <p><strong>Location:</strong> Lat: {{ session.location.latitude }} Long: {{session.location.longitude}} </p>
         }
