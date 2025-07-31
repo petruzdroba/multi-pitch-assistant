@@ -1,5 +1,5 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, inject, ViewEncapsulation } from '@angular/core';
 import { Router } from '@angular/router';
 import { IonButton, IonList, IonItem } from '@ionic/angular/standalone';
 import { CanComponentDeactivate } from 'src/app/guards/session-exit.guard';
@@ -11,6 +11,7 @@ import { Dialog } from '@capacitor/dialog';
   selector: 'app-session',
   templateUrl: './session.component.html',
   styleUrls: ['./session.component.css'],
+  encapsulation: ViewEncapsulation.None,
   imports: [IonItem, IonList, IonButton, DatePipe, CommonModule],
 })
 export class SessionComponent implements CanComponentDeactivate {

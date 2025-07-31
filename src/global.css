@@ -58,3 +58,12 @@ ion-button.btn-action[fill="outline"] {
   --background: transparent;
   transition: all 0.6s ease;
 }
+
+ion-card, ion-card-content, ion-item::part(native){
+  background-color: var(--background-dark-color);
+  color: var(--text-color)
+}
+
+ion-list {
+  background-color: var(transparent)
+}

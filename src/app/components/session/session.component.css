@@ -21,7 +21,8 @@
 }
 
 .event-item {
-  margin: 0.3rem 0;
+  margin: 0.6rem 0;
+  background-color: var(--background-dark-color);
   border-radius: 8px;
   box-shadow: 0 1px 3px rgb(0 0 0 / 0.1);
 }
@@ -35,7 +36,7 @@
 
 .event-time {
   font-size: 0.9rem;
-  color: #666;
+  color: var(--text-color);
   white-space: nowrap;
 }
 

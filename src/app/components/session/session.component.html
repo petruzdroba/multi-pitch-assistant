@@ -3,7 +3,6 @@
   <button (click)="test()">Add test event</button>
   <ion-list class="event-list">
     @for(event of getEvents();track event.id){
-    <div class="event-item">
       <ion-item class="event-item">
         <h2 class="event-type">{{ event.type }}</h2>
         <div class="event-extra">
@@ -13,7 +12,6 @@
           }
         </div>
       </ion-item>
-    </div>
     }
   </ion-list>
 </div>
