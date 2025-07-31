@@ -10,6 +10,7 @@
 
 .greeting-header {
   width: 100%;
+  color: var(--text-color);
   padding: 0 16px 24px 16px;
   text-align: left;
 }
@@ -22,6 +23,6 @@
 
 .greeting-subtext {
   font-size: 1.2rem;
-  color: var(--ion-color-medium);
+  color: var(--text-hover-color);
   margin: 0;
 }
