@@ -30,10 +30,13 @@ export class AppComponent implements OnInit {
         // Add new bg class
         if (event.url.includes('/tabs/home')) {
           this.renderer.addClass(appElement, 'bg-home');
-        } else if (event.url.includes('/tabs/log')) {
+        } else if (event.url.includes('/tabs/log') || event.url.includes('/tabs/session-details')) {
           this.renderer.addClass(appElement, 'bg-log');
         }else if (event.url.includes('/tabs/session')){
           this.renderer.addClass(appElement, 'bg-session');
+        }else{
+          this.renderer.addClass(appElement, 'bg-home');
+          // fallback
         }
       });
   }

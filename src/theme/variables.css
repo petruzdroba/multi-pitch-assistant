@@ -1,7 +1,9 @@
 :root{
+  --ion-color-primary: white !important;
+
    /* Primary Theme Colors */
-  --primary-color: #53A548;
-  --primary-hover-color: #59B34D;
+  --primary-color: white;
+  --primary-hover-color: white;
   --primary-opacity-color: #53A5484D;
 
   /* Background Colors */

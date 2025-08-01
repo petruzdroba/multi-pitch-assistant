@@ -1,7 +1,8 @@
 <div class="main">
   @if(loadedSession() === undefined){
-  <ion-progress-bar type="indeterminate"></ion-progress-bar>
-  <ion-button size="large" color="danger" fill="outline" class="btn-cancel" (click)="onCancel()">Cancel</ion-button>
+  <ion-progress-bar type="indeterminate" class="glass-progress"></ion-progress-bar>
+  <!-- <ion-button size="large" color="danger" fill="outline" class="btn-cancel" (click)="onCancel()">Cancel</ion-button> -->
+  <button class="btn-glass-danger btn-cancel" (click)="onCancel()">Cancel</button>
   }@else {
   <div class="header-section">
     <div class="greeting-header">
@@ -21,7 +22,6 @@
   <div class="scrollable-content">
     <ion-list class="event-list">
       @for(event of loadedSession()?.events;track event.id){
-      <div class="event-item">
 
         @if($first || $last) {
         <ion-item class="event-item">
@@ -36,7 +36,7 @@
         }@else {
         <ion-item-sliding #slidingItem>
           <!-- Main content -->
-          <ion-item>
+          <ion-item class="event-item">
             <h2 class="event-type">{{ event.type }}</h2>
             <div class="event-extra">
               <p class="event-time">{{ event.time | date:'dd/MM/yyyy, HH:mm' }}</p>
@@ -46,23 +46,21 @@
             </div>
           </ion-item>
 
-          <!-- Left swipe: Edit -->
-          <ion-item-options side="start" (click)="openModal(event)">
-            <ion-item-option color="medium">
-              <ion-icon slot="icon-only" name="create"></ion-icon>
-            </ion-item-option>
-          </ion-item-options>
+          <ion-item-options side="start">
+  <ion-item-option class="glass-swipe medium" (click)="openModal(event)">
+    <ion-icon slot="icon-only" name="create"></ion-icon>
+  </ion-item-option>
+</ion-item-options>
 
-          <!-- Right swipe: Delete -->
-          <ion-item-options side="end">
-            <ion-item-option color="danger">
-              <ion-icon slot="icon-only" name="trash"></ion-icon>
-            </ion-item-option>
-          </ion-item-options>
+<ion-item-options side="end">
+  <ion-item-option class="glass-swipe danger" >
+    <ion-icon slot="icon-only" name="trash"></ion-icon>
+  </ion-item-option>
+</ion-item-options>
+
         </ion-item-sliding>
         }
 
-      </div>
       }
     </ion-list>
   </div>
