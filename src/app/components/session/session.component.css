@@ -13,7 +13,7 @@
 }
 
 .event-list {
-  width: 100%;
+  width: 95%;
   max-height: max-content;
   overflow-y: auto;
   margin-top: 16px;
@@ -21,10 +21,13 @@
 }
 
 .event-item {
-  margin: 0.6rem 0;
-  background-color: var(--background-dark-color);
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgb(0 0 0 / 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(8px);
+  border-radius: 12px;
+  margin-bottom: 12px;
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fff;
 }
 
 .event-type {
@@ -35,14 +38,14 @@
 }
 
 .event-time {
-  font-size: 0.9rem;
-  color: var(--text-color);
+  font-size: 1rem;
+  font-weight: 500;
   white-space: nowrap;
 }
 
 .event-altitude {
   margin-top: 4px;
-  font-size: 0.85rem;
+  font-size: 1rem;
   font-weight: 500;
 }
 
