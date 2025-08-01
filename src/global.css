@@ -36,34 +36,92 @@
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
 @import '@ionic/angular/css/palettes/dark.system.css';
 
-ion-app, ion-router-outlet {
-  background: var(--background-color);
+ion-app.bg-home {
+  background-image: url('/assets/images/cobra.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
 }
 
-ion-tab-bar {
-  --background: var(--background-dark-color);
-  --color: var(--text-color);
+ion-app.bg-session{
+  background-image: url('/assets/images/excallibur.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
 }
 
-ion-tab-button {
-  --color-selected: var(--primary-hover-color);
-  color: var(--primary-color);
-  background: var(--background-dark-color);
-  transition: all 0.6s ease;
+ion-app.bg-log {
+  background-image: url('/assets/images/megos_rest.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
 }
 
-ion-button.btn-action[fill="outline"] {
-  --border-color: var(--primary-color);
-  --color: var(--primary-color);
-  --background: transparent;
-  transition: all 0.6s ease;
+ion-app {
+  transition: background-image 0.3s ease-in-out, filter 0.4s ease-in-out;
 }
 
-ion-card, ion-card-content, ion-item::part(native){
-  background-color: var(--background-dark-color);
-  color: var(--text-color)
+.button-69 {
+  padding: 12px 24px;
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 12px;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  transition: all 0.25s ease;
+  cursor: pointer;
+  text-align: center;
 }
 
-ion-list {
-  background-color: var(transparent)
+.button-69:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.35);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
 }
+
+.button-69:active {
+  transform: scale(0.96);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
+}
+
+.text-white-bold {
+  color: #fff;
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  user-select: none;
+}
+
+.text-white-glow {
+  color: #fff;
+  text-shadow:
+    0 0 5px rgba(255, 255, 255, 0.6),
+    0 0 10px rgba(255, 255, 255, 0.4);
+  font-weight: 600;
+  user-select: none;
+}
+
+.text-white-outline {
+  color: #fff;
+  -webkit-text-stroke: 1px rgba(0, 0, 0, 0.3);
+  font-weight: 800;
+  user-select: none;
+}
+
+.text-white-frost {
+  color: #fff;
+  text-shadow:
+    0 0 6px rgba(255, 255, 255, 0.5),
+    0 4px 6px rgba(0, 0, 0, 0.3);
+  font-weight: 700;
+  user-select: none;
+}
+
+
