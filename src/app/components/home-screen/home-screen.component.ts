@@ -1,6 +1,5 @@
 import { Component, inject, ViewEncapsulation } from '@angular/core';
 import { SessionService } from 'src/app/services/session.service';
-import { IonButton } from '@ionic/angular/standalone';
 import { Router } from '@angular/router';
 
 @Component({
@@ -8,7 +7,7 @@ import { Router } from '@angular/router';
   templateUrl: './home-screen.component.html',
   styleUrls: ['./home-screen.component.css'],
   encapsulation: ViewEncapsulation.None,
-  imports: [IonButton],
+  imports: [],
 })
 export class HomeScreenComponent {
   private sessionService = inject(SessionService);

@@ -1,1 +1,33 @@
+.glass-tab {
+  background: rgba(255, 255, 255, 0.08) !important;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.25);
+}
 
+.glass-tab ion-tab-button {
+  --color: rgba(255, 255, 255, 0.7);
+  --color-selected: white;
+  --background: transparent;
+  --background-focused: rgba(255, 255, 255, 0.15);
+  --ripple-color: rgba(255, 255, 255, 0.2);
+  transition: transform 0.15s ease-in-out;
+}
+
+.glass-tab ion-tab-button:hover {
+  transform: translateY(-2px);
+}
+
+.glass-tab ion-tab-button:active {
+  transform: scale(0.95);
+}
+
+.glass-tab ion-icon {
+  opacity: 0.65;
+  transition: opacity 0.3s;
+}
+
+.glass-tab ion-tab-button.ion-selected ion-icon {
+  opacity: 1;
+}
