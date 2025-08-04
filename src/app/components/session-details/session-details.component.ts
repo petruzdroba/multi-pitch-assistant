@@ -4,7 +4,6 @@ import { Session } from 'src/app/models/session.interface';
 import { LogService } from 'src/app/services/log.service';
 import {
   IonProgressBar,
-  IonButton,
   IonItem,
   IonInput,
   IonList,
@@ -29,9 +28,7 @@ import { FormsModule } from '@angular/forms';
     DatePipe,
     CommonModule,
     FormsModule,
-
     IonProgressBar,
-    IonButton,
     IonItem,
     IonInput,
     IonList,
@@ -40,8 +37,8 @@ import { FormsModule } from '@angular/forms';
     IonIcon,
     IonItemSliding,
     IonItemOptions,
-    IonItemOption,
-  ],
+    IonItemOption
+],
 })
 export class SessionDetailsComponent implements OnInit {
   private logService = inject(LogService);

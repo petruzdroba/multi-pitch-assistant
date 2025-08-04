@@ -35,3 +35,139 @@
 /* @import "@ionic/angular/css/palettes/dark.always.css"; */
 /* @import "@ionic/angular/css/palettes/dark.class.css"; */
 @import '@ionic/angular/css/palettes/dark.system.css';
+
+:root {
+  --ion-background-color: transparent !important;
+  --ion-toolbar-background: transparent !important;
+  --ion-item-background: transparent !important;
+}
+
+
+ion-app.bg-home {
+  background-image: url('/assets/images/cobra.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+ion-app.bg-session{
+  background-image: url('/assets/images/excalibur.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+ion-app.bg-log {
+  background-image: url('/assets/images/megos_rest.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+ion-app {
+  transition: background-image 0.3s ease-in-out, filter 0.4s ease-in-out;
+}
+
+ion-input.glass-input {
+  --highlight-color-focused: rgba(255, 255, 255, 0.3);
+}
+
+
+.btn-glass {
+  padding: 12px 24px;
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 12px;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  transition: all 0.25s ease;
+  cursor: pointer;
+  text-align: center;
+}
+
+.btn-glass:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.35);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+}
+
+.btn-glass:active {
+  transform: scale(0.96);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
+}
+
+.btn-glass-danger {
+  padding: 12px 24px;
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: red; /* softer, lighter red */
+  background: rgba(255, 0, 0, 0.12); /* slightly stronger transparent red */
+  border: 1px solid rgba(255, 0, 0, 0.35);
+  border-radius: 12px;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 4px 12px rgba(255, 0, 0, 0.25);
+  transition: all 0.25s ease;
+  cursor: pointer;
+  text-align: center;
+}
+
+.btn-glass-danger:hover {
+  background: rgba(255, 0, 0, 0.25);
+  border-color: rgba(255, 0, 0, 0.6);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 0, 0, 0.45);
+}
+
+.btn-glass-danger:active {
+  transform: scale(0.96);
+  box-shadow: 0 3px 8px rgba(255, 0, 0, 0.25);
+}
+
+
+
+ion-item.event-item {
+  --background: transparent;
+  --ion-background-color: transparent;
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 12px;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  padding: 16px;
+  margin-bottom: 12px;
+  transition: all 0.25s ease;
+  color: white;
+}
+
+ion-item.event-item::part(native) {
+  background: transparent !important;
+}
+
+ion-content {
+  --background: transparent;
+  --ion-background-color: transparent;
+}
+
+ion-input::part(native) {
+  color: white !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+
+ion-input::part(native):focus {
+  outline: none !important;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.4) !important;
+}
+
+
+
+

@@ -1,6 +1,76 @@
+.main{
+  background-image: url('../../../../assets/images/lapnor.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
 ion-content {
   --padding-top: 16px;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
 }
+
+.glass-form ion-item {
+  --background: rgba(255, 255, 255, 0.06);
+  --border-color: rgba(255, 255, 255, 0.2);
+  --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  --backdrop-filter: blur(8px);
+  --border-radius: 12px;
+  --padding-start: 12px;
+  --padding-end: 12px;
+  --inner-padding-top: 12px;
+  --inner-padding-bottom: 12px;
+  border: 1px solid var(--border-color);
+  margin-bottom: 12px;
+  border-radius: var(--border-radius);
+  background: var(--background);
+  backdrop-filter: var(--backdrop-filter);
+  -webkit-backdrop-filter: var(--backdrop-filter);
+  box-shadow: var(--box-shadow);
+}
+
+.glass-form ion-label {
+  color: #ffffffcc;
+}
+
+.glass-form ion-input,
+.glass-form ion-select,
+.glass-form ion-textarea {
+  color: #fff;
+  --highlight-color-focused: rgba(255, 255, 255, 0.3);
+  --placeholder-color: rgba(255, 255, 255, 0.4);
+  --color: #fff;
+}
+
+::ng-deep .select-interface-option {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #fff !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+::ng-deep .alert-wrapper,
+::ng-deep .action-sheet-group {
+  background: rgba(255, 255, 255, 0.08) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+::ng-deep .alert-button {
+  color: #fff;
+}
+
+::ng-deep .alert-radio-label {
+  color: #fff !important;
+}
+
+::ng-deep .alert-title,
+::ng-deep .alert-sub-title {
+  color: #fff;
+}
+
+

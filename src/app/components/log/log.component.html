@@ -1,9 +1,11 @@
 <div class="main">
-  <h1 class="title">Your past adventures</h1>
+  <div class="greeting-header">
+    <h1 class="greeting-title">Your past adventures</h1>
+  </div>
 
   <div class="session-cards">
     @if(getSessions().length === 0) {
-    <ion-card>
+    <ion-card class="glass-card-static">
       <ion-card-header>
         <ion-card-title>No sessions recorded yet</ion-card-title>
       </ion-card-header>
@@ -14,16 +16,16 @@
     }
 
     @for(session of getSessions(); track session.id){
-    <ion-card (click)="onOpenSession(session.id)">
+    <ion-card class="glass-card" (click)="onOpenSession(session.id)">
       <ion-card-header>
-        <ion-card-title>
+        <ion-card-title >
           {{ session.name ? (session.name + ' on ' + (session.timeStart | date: 'EEE, MMMM d')) : ('Climb on ' +
           (session.timeStart | date: 'EEE, MMMM d')) }}
         </ion-card-title>
       </ion-card-header>
 
 
-      <ion-card-content>
+      <ion-card-content >
         @if(session.location) {
         <p><strong>Location:</strong> Lat: {{ session.location.latitude }} Long: {{session.location.longitude}} </p>
         }

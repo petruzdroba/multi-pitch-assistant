@@ -35,21 +35,28 @@
   width: 100%;
 }
 
+.btn-submit {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  z-index: 1000;
+}
+
 .greeting-header {
   width: 100%;
-  padding: 0 0 16px 0;
+  padding: 0 16px 24px 16px;
   text-align: left;
 }
 
 .greeting-title {
   font-size: 1.8rem;
   font-weight: bold;
-  margin: 0 0 8px 0;
+  margin-bottom: 8px;
 }
 
 .greeting-subtext {
   font-size: 1.2rem;
-  color: var(--ion-color-medium);
+  font-weight: bold;
   margin: 0;
 }
 
@@ -89,7 +96,6 @@
 
 .event-time {
   font-size: 0.9rem;
-  color: #666;
   margin: 0;
 }
 
@@ -111,3 +117,64 @@ ion-input {
   --padding-start: 16px;
   --padding-end: 16px;
 }
+
+.glass-progress {
+  --background: rgba(255, 255, 255, 0.05); /* Track */
+  --progress-background: rgba(255, 255, 255, 0.25); /* Fill */
+  height: 10px;
+  border-radius: 12px;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  /* border: 1px solid rgba(255, 255, 255, 0.25); */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  transition: all 0.25s ease;
+}
+
+/* Shared glassy base style */
+.glass-swipe {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  backdrop-filter: blur(6px) !important;
+  -webkit-backdrop-filter: blur(6px) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25) !important;
+  transition: all 0.25s ease !important;
+  color: #fff !important;
+  border-radius: 12px !important;
+}
+
+/* Red glassy danger swipe */
+.glass-swipe.danger {
+  background: rgba(255, 0, 0, 0.12) !important;
+  border-color: rgba(255, 0, 0, 0.3) !important;
+  box-shadow: 0 4px 12px rgba(128, 0, 0, 0.25) !important;
+}
+
+/* Grey glassy medium swipe */
+.glass-swipe.medium {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  box-shadow: 0 4px 12px rgba(80, 80, 80, 0.25) !important;
+}
+
+.glass-input{
+  --background: rgba(255, 255, 255, 0.08);
+  --color: #ffffff;
+  --border-color: rgba(255, 255, 255, 0.25);
+  --highlight-color-focused: rgba(255, 255, 255, 0.35);
+  --ion-color-primary: rgba(255, 255, 255, 0.6);
+  --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border-radius: 12px;
+  padding: 12px;
+  transition: all 0.25s ease;
+}
+
+.glass-input input {
+  color: #fff;
+  background: transparent;
+  border: none;
+  outline: none;
+}
+

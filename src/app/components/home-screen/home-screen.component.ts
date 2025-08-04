@@ -1,13 +1,13 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ViewEncapsulation } from '@angular/core';
 import { SessionService } from 'src/app/services/session.service';
-import { IonButton } from '@ionic/angular/standalone';
 import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-home-screen',
   templateUrl: './home-screen.component.html',
   styleUrls: ['./home-screen.component.css'],
-  imports: [IonButton],
+  encapsulation: ViewEncapsulation.None,
+  imports: [],
 })
 export class HomeScreenComponent {
   private sessionService = inject(SessionService);
