@@ -15,3 +15,6 @@ Built with **Angular** and **Ionic**, this app is focused on usability in rugged
 - 🔄 **Offline First** – No internet? No problem. Log everything offline (planned)
 
 ---
+![Screenshot_20250801_153241_multi-buddy](https://github.com/user-attachments/assets/2e7303ef-bbdf-4d48-8f72-17c0fb6e352e)
+![Screenshot_20250801_153255_multi-buddy](https://github.com/user-attachments/assets/78c7203a-4ba7-42fc-9624-23c94694efeb)
+![Screenshot_20250801_153520_multi-buddy](https://github.com/user-attachments/assets/616114bb-defe-4b4c-b33d-7e6f53b55e4d)
