@@ -71,6 +71,11 @@ ion-app {
   transition: background-image 0.3s ease-in-out, filter 0.4s ease-in-out;
 }
 
+ion-input.glass-input {
+  --highlight-color-focused: rgba(255, 255, 255, 0.3);
+}
+
+
 .btn-glass {
   padding: 12px 24px;
   font-size: 1.4rem;
@@ -152,5 +157,17 @@ ion-content {
   --background: transparent;
   --ion-background-color: transparent;
 }
+
+ion-input::part(native) {
+  color: white !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+}
+
+ion-input::part(native):focus {
+  outline: none !important;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.4) !important;
+}
+
+
 
 

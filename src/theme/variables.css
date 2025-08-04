@@ -1,27 +1,7 @@
-:root{
-  --ion-color-primary: white !important;
-
-   /* Primary Theme Colors */
-  --primary-color: white;
-  --primary-hover-color: white;
-  --primary-opacity-color: #53A5484D;
-
-  /* Background Colors */
-  --background-color: #28231C;
-  --background-dark-color: #24201A;
-  --background-hover-color: #362F24;
-
-  /* Text Colors */
-  --text-color: #D79FC1;
-  --text-hover-color: #AF879F;
-  --text-disabled-color:	#9E788F66;
-
-  /* Shadow */
-  --shadow-color: #0000004d;
-
-   /* Accent / Utility Colors - HIGH CONTRAST FOR DARK BACKGROUND */
-  --success-color: #4CAF50;   /* brighter green than primary */
-  --warning-color: #FFB100;   /* strong amber */
-  --danger-color: #FF4C4C;    /* vivid red */
-  --info-color: #00B8D9;      /* bright cyan/teal */
+:root {
+  --ion-color-primary: rgba(255, 255, 255, 0.8);
+  --ion-color-primary-contrast: #000000;
+  --ion-color-primary-rgb: 255, 255, 255;
+  --ion-color-primary-shade: #cccccc;
+  --ion-color-primary-tint: #ffffff;
 }

@@ -35,6 +35,13 @@
   width: 100%;
 }
 
+.btn-submit {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  z-index: 1000;
+}
+
 .greeting-header {
   width: 100%;
   padding: 0 16px 24px 16px;
@@ -148,5 +155,26 @@ ion-input {
   background: rgba(255, 255, 255, 0.1) !important;
   border-color: rgba(255, 255, 255, 0.3) !important;
   box-shadow: 0 4px 12px rgba(80, 80, 80, 0.25) !important;
+}
+
+.glass-input{
+  --background: rgba(255, 255, 255, 0.08);
+  --color: #ffffff;
+  --border-color: rgba(255, 255, 255, 0.25);
+  --highlight-color-focused: rgba(255, 255, 255, 0.35);
+  --ion-color-primary: rgba(255, 255, 255, 0.6);
+  --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border-radius: 12px;
+  padding: 12px;
+  transition: all 0.25s ease;
+}
+
+.glass-input input {
+  color: #fff;
+  background: transparent;
+  border: none;
+  outline: none;
 }
 
