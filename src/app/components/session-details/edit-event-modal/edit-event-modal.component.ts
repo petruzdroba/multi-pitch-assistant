@@ -24,6 +24,7 @@ import { IonicModule } from '@ionic/angular';
   standalone: true,
   selector: 'app-modal-example',
   templateUrl: 'edit-event-modal.component.html',
+  styleUrls: ['edit-event-modal.component.css'],
   imports: [
     FormsModule,
     // IonicModule,
