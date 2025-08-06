@@ -2,6 +2,7 @@ import { IonApp, IonRouterOutlet } from '@ionic/angular/standalone';
 import { Component, inject, OnInit, Renderer2 } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
+import { DatabaseService } from './services/database.service';
 
 @Component({
   selector: 'app-root',
@@ -13,10 +14,21 @@ import { filter } from 'rxjs/operators';
 export class AppComponent implements OnInit {
   private router = inject(Router);
   private renderer = inject(Renderer2);
+  private db = inject(DatabaseService);
+  dbReady = false;
+  error: string | null = null;
 
-  ngOnInit() {
+  async ngOnInit() {
+    try {
+      await this.db.init();
+      this.dbReady = true;
+    } catch (err: any) {
+      this.error = 'Failed to initialize database';
+      console.error(err);
+    }
+
     this.router.events
-      .pipe(filter(event => event instanceof NavigationEnd))
+      .pipe(filter((event) => event instanceof NavigationEnd))
       .subscribe((event: NavigationEnd) => {
         const appElement = document.querySelector('ion-app');
         if (!appElement) return;
@@ -26,15 +38,17 @@ export class AppComponent implements OnInit {
         this.renderer.removeClass(appElement, 'bg-log');
         this.renderer.removeClass(appElement, 'bg-session');
 
-
         // Add new bg class
         if (event.url.includes('/tabs/home')) {
           this.renderer.addClass(appElement, 'bg-home');
-        } else if (event.url.includes('/tabs/log') || event.url.includes('/tabs/session-details')) {
+        } else if (
+          event.url.includes('/tabs/log') ||
+          event.url.includes('/tabs/session-details')
+        ) {
           this.renderer.addClass(appElement, 'bg-log');
-        }else if (event.url.includes('/tabs/session')){
+        } else if (event.url.includes('/tabs/session')) {
           this.renderer.addClass(appElement, 'bg-session');
-        }else{
+        } else {
           this.renderer.addClass(appElement, 'bg-home');
           // fallback
         }
