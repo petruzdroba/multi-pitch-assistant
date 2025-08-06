@@ -22,6 +22,7 @@ export class DatabaseService {
   async init(): Promise<void> {
   this.db = await this.sqlite.createConnection(this.dbName, false, 'no-encryption', 1, false);
   await this.db.open();
+  await this.createTables();
   }
 
   private async createTables(): Promise<void>{
@@ -154,6 +155,46 @@ export class DatabaseService {
   return fullSessions;
 }
 
+  async updateEvent(event: ClimbEvent, sessionId: string): Promise<void> {
+  const db = this.getDatabase();
+
+  await db.run(
+    `UPDATE climb_events SET
+      time = ?, altitude = ?, type = ?, notes = ?
+     WHERE id = ? AND session_id = ?`,
+    [
+      event.time.toISOString(),
+      event.altitude ?? null,
+      event.type,
+      event.notes ?? null,
+      event.id,
+      sessionId,
+    ]
+  );
+}
+
+async updateSession(session: Session): Promise<void> {
+  const db = this.getDatabase();
+
+  await db.run(
+    `UPDATE sessions SET
+      time_start = ?, time_end = ?, name = ?, type = ?, latitude = ?, longitude = ?,
+      notes = ?, completed = ?, pitch_count = ?
+     WHERE id = ?`,
+    [
+      session.timeStart.toISOString(),
+      session.timeEnd.toISOString(),
+      session.name ?? null,
+      session.type ?? 'undefined',
+      session.location?.latitude ?? null,
+      session.location?.longitude ?? null,
+      session.notes ?? null,
+      session.completed ? 1 : 0,
+      session.pitchCount ?? null,
+      session.id,
+    ]
+  );
+}
 
   getDatabase(): SQLiteDBConnection {
     if (!this.db) {
@@ -176,10 +217,9 @@ export class DatabaseService {
    async close(): Promise<void> {
     if (this.db) {
       try {
-        // closeConnection is the plugin method
         await (this.sqlite as any).closeConnection(this.dbName, false);
       } catch {
-        // ignore if not available
+        console.error('Error closing database connection');
       }
       this.db = null;
     }
