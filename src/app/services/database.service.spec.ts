@@ -175,5 +175,90 @@ describe('DatabaseService (detailed)', () => {
           .toBeRejectedWithError('Database not initialized');
       });
     });
+
+    describe('updateEvent()', () => {
+      it('should update the climb event in the database', async () => {
+        const event: ClimbEvent = {
+          id: 'ev999',
+          time: new Date('2025-01-01T12:34:56Z'),
+          altitude: 123.45,
+          type: 'fall',
+          notes: 'It was slippery'
+        };
+        const sessionId = 'sess999';
+
+        await service.updateEvent(event, sessionId);
+
+        expect(mockDb.run).toHaveBeenCalledOnceWith(
+          jasmine.stringMatching(/^UPDATE climb_events SET/),
+          [
+            event.time.toISOString(),
+            event.altitude,
+            event.type,
+            event.notes,
+            event.id,
+            sessionId
+          ]
+        );
+      });
+
+      it('should throw if db is not initialized', async () => {
+        (service as any).db = null;
+        const dummyEvent: ClimbEvent = {
+          id: 'bad',
+          time: new Date(),
+          type: 'fall'
+        };
+        await expectAsync(service.updateEvent(dummyEvent, 'some-session'))
+          .toBeRejectedWithError('Database not initialized');
+      });
+    });
+
+    describe('updateSession()', () => {
+      it('should update the session in the database', async () => {
+        const session: Session = {
+          id: 'sess123',
+          timeStart: new Date('2025-01-01T10:00:00Z'),
+          timeEnd: new Date('2025-01-01T11:00:00Z'),
+          events: [],
+          name: 'Updated Session',
+          type: 'sport',
+          location: { latitude: 42.1, longitude: -71.2 },
+          notes: 'Updated notes',
+          completed: true,
+          pitchCount: 4
+        };
+
+        await service.updateSession(session);
+
+        expect(mockDb.run).toHaveBeenCalledOnceWith(
+          jasmine.stringMatching(/^UPDATE sessions SET/),
+          [
+            session.timeStart.toISOString(),
+            session.timeEnd.toISOString(),
+            session.name,
+            session.type,
+            session.location?.latitude,
+            session.location?.longitude,
+            session.notes,
+            1,
+            session.pitchCount,
+            session.id
+          ]
+        );
+      });
+
+      it('should throw if db is not initialized', async () => {
+        (service as any).db = null;
+        const dummySession: Session = {
+          id: 'bad',
+          timeStart: new Date(),
+          timeEnd: new Date(),
+          events: []
+        };
+        await expectAsync(service.updateSession(dummySession))
+          .toBeRejectedWithError('Database not initialized');
+      });
+    });
   });
 });
