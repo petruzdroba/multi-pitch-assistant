@@ -16,7 +16,10 @@ export class LogService {
 
   private async init(): Promise<void> {
     try {
-      const sessions = await this.dbService.getFullLog();
+      const sessions = await this.dbService.getFullLog().catch((error) => {
+        console.error('Error fetching logs from database:', error);
+        return [];
+      });
       this.logs.set(sessions);
     } catch (error) {
       console.error('Error fetching logs:', error);

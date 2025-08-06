@@ -6,6 +6,7 @@ import {
 } from '@capacitor-community/sqlite';
 import { Session } from '../models/session.interface';
 import { ClimbEvent } from '../models/climb-event.interface';
+import { Capacitor } from '@capacitor/core';
 
 @Injectable({
   providedIn: 'root',
@@ -19,11 +20,24 @@ export class DatabaseService {
     this.sqlite = new SQLiteConnection(CapacitorSQLite);
   }
 
-  async init(): Promise<void> {
-  this.db = await this.sqlite.createConnection(this.dbName, false, 'no-encryption', 1, false);
-  await this.db.open();
-  await this.createTables();
+
+async init(): Promise<void> {
+  if (Capacitor.getPlatform() === 'web') {
+    console.log('Running on Web: skipping DB initialization');
+    return;
   }
+
+  try {
+    this.db = await this.sqlite.createConnection(this.dbName, false, 'no-encryption', 1, false);
+    await this.db.open();
+    await this.createTables();
+    console.log('Native DB initialized on device');
+  } catch (err) {
+    console.error('Failed to initialize DB on device', err);
+    throw err;
+  }
+}
+
 
   private async createTables(): Promise<void>{
     if(! this.db)
@@ -39,7 +53,6 @@ export class DatabaseService {
     await this.db.execute(`
       CREATE TABLE IF NOT EXISTS sessions (
         id TEXT PRIMARY KEY,
-        log_id TEXT NOT NULL,
         time_start TEXT NOT NULL,
         time_end TEXT NOT NULL,
         name TEXT,
@@ -48,8 +61,7 @@ export class DatabaseService {
         longitude REAL,
         notes TEXT,
         completed INTEGER CHECK(completed IN (0,1)),
-        pitch_count INTEGER,
-        FOREIGN KEY (log_id) REFERENCES logs(id) ON DELETE CASCADE
+        pitch_count INTEGER
       );
     `);
 
