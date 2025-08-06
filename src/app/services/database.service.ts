@@ -7,6 +7,7 @@ import {
 import { Session } from '../models/session.interface';
 import { ClimbEvent } from '../models/climb-event.interface';
 import { Capacitor } from '@capacitor/core';
+import { environment } from 'src/environments/environment.prod';
 
 @Injectable({
   providedIn: 'root',
@@ -22,7 +23,7 @@ export class DatabaseService {
 
 
 async init(): Promise<void> {
-  if (Capacitor.getPlatform() === 'web') {
+  if (Capacitor.getPlatform() === 'web' && !environment.test) {
     console.log('Running on Web: skipping DB initialization');
     return;
   }
