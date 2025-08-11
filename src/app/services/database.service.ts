@@ -21,28 +21,31 @@ export class DatabaseService {
     this.sqlite = new SQLiteConnection(CapacitorSQLite);
   }
 
+  async init(): Promise<void> {
+    if (Capacitor.getPlatform() === 'web' && !environment.test) {
+      console.log('Running on Web: skipping DB initialization');
+      return;
+    }
 
-async init(): Promise<void> {
-  if (Capacitor.getPlatform() === 'web' && !environment.test) {
-    console.log('Running on Web: skipping DB initialization');
-    return;
+    try {
+      this.db = await this.sqlite.createConnection(
+        this.dbName,
+        false,
+        'no-encryption',
+        1,
+        false
+      );
+      await this.db.open();
+      await this.createTables();
+      console.log('Native DB initialized on device');
+    } catch (err) {
+      console.error('Failed to initialize DB on device', err);
+      throw err;
+    }
   }
 
-  try {
-    this.db = await this.sqlite.createConnection(this.dbName, false, 'no-encryption', 1, false);
-    await this.db.open();
-    await this.createTables();
-    console.log('Native DB initialized on device');
-  } catch (err) {
-    console.error('Failed to initialize DB on device', err);
-    throw err;
-  }
-}
-
-
-  private async createTables(): Promise<void>{
-    if(! this.db)
-      throw new Error('Database not initialized');
+  private async createTables(): Promise<void> {
+    if (!this.db) throw new Error('Database not initialized');
 
     // await this.db.execute(`
     //   CREATE TABLE IF NOT EXISTS logs (
@@ -84,7 +87,7 @@ async init(): Promise<void> {
     `);
   }
 
-  async addSession(session: Session):Promise<void>{
+  async addSession(session: Session): Promise<void> {
     const db = this.getDatabase();
 
     if (!db) throw new Error('Database not initialized');
@@ -125,89 +128,106 @@ async init(): Promise<void> {
   }
 
   async getFullLog(): Promise<Session[]> {
-  if (!this.db) throw new Error('Database not initialized');
+    if (!this.db) throw new Error('Database not initialized');
 
-  const sessionsResult = await this.db.query(`SELECT * FROM sessions ORDER BY time_start`);
-  const fullSessions: Session[] = [];
-
-  for (const row of sessionsResult.values ?? []) {
-    const eventsResult = await this.db.query(
-      `SELECT * FROM climb_events WHERE session_id = ? ORDER BY time`,
-      [row.id]
+    const sessionsResult = await this.db.query(
+      `SELECT * FROM sessions ORDER BY time_start`
     );
+    const fullSessions: Session[] = [];
 
-    const events: ClimbEvent[] = (eventsResult.values ?? []).map(ev => ({
-      id: ev.id,
-      time: new Date(ev.time),
-      altitude: ev.altitude,
-      type: ev.type,
-      notes: ev.notes,
-    }));
+    for (const row of sessionsResult.values ?? []) {
+      const eventsResult = await this.db.query(
+        `SELECT * FROM climb_events WHERE session_id = ? ORDER BY time`,
+        [row.id]
+      );
 
-    const session: Session = {
-      id: row.id,
-      timeStart: new Date(row.time_start),
-      timeEnd: new Date(row.time_end),
-      events,
-      name: row.name ?? undefined,
-      type: row.type ?? undefined,
-      location: (row.location_latitude != null && row.location_longitude != null)
-        ? {
-            latitude: row.location_latitude,
-            longitude: row.location_longitude,
-          }
-        : undefined,
-      notes: row.notes ?? undefined,
-      completed: row.completed === 1,
-      pitchCount: row.pitch_count ?? undefined,
-    };
+      const events: ClimbEvent[] = (eventsResult.values ?? []).map((ev) => ({
+        id: ev.id,
+        time: new Date(ev.time),
+        altitude: ev.altitude,
+        type: ev.type,
+        notes: ev.notes,
+      }));
 
-    fullSessions.push(session);
+      const session: Session = {
+        id: row.id,
+        timeStart: new Date(row.time_start),
+        timeEnd: new Date(row.time_end),
+        events,
+        name: row.name ?? undefined,
+        type: row.type ?? undefined,
+        location:
+          row.location_latitude != null && row.location_longitude != null
+            ? {
+                latitude: row.location_latitude,
+                longitude: row.location_longitude,
+              }
+            : undefined,
+        notes: row.notes ?? undefined,
+        completed: row.completed === 1,
+        pitchCount: row.pitch_count ?? undefined,
+      };
+
+      fullSessions.push(session);
+    }
+
+    return fullSessions;
   }
 
-  return fullSessions;
-}
-
   async updateEvent(event: ClimbEvent, sessionId: string): Promise<void> {
-  const db = this.getDatabase();
+    const db = this.getDatabase();
 
-  await db.run(
-    `UPDATE climb_events SET
+    await db.run(
+      `UPDATE climb_events SET
       time = ?, altitude = ?, type = ?, notes = ?
      WHERE id = ? AND session_id = ?`,
-    [
-      event.time.toISOString(),
-      event.altitude ?? null,
-      event.type,
-      event.notes ?? null,
-      event.id,
-      sessionId,
-    ]
-  );
-}
+      [
+        event.time.toISOString(),
+        event.altitude ?? null,
+        event.type,
+        event.notes ?? null,
+        event.id,
+        sessionId,
+      ]
+    );
+  }
 
-async updateSession(session: Session): Promise<void> {
-  const db = this.getDatabase();
+  async updateSession(session: Session): Promise<void> {
+    const db = this.getDatabase();
 
-  await db.run(
-    `UPDATE sessions SET
+    await db.run(
+      `UPDATE sessions SET
       time_start = ?, time_end = ?, name = ?, type = ?, latitude = ?, longitude = ?,
       notes = ?, completed = ?, pitch_count = ?
      WHERE id = ?`,
-    [
-      session.timeStart.toISOString(),
-      session.timeEnd.toISOString(),
-      session.name ?? null,
-      session.type ?? 'undefined',
-      session.location?.latitude ?? null,
-      session.location?.longitude ?? null,
-      session.notes ?? null,
-      session.completed ? 1 : 0,
-      session.pitchCount ?? null,
-      session.id,
-    ]
-  );
-}
+      [
+        session.timeStart.toISOString(),
+        session.timeEnd.toISOString(),
+        session.name ?? null,
+        session.type ?? 'undefined',
+        session.location?.latitude ?? null,
+        session.location?.longitude ?? null,
+        session.notes ?? null,
+        session.completed ? 1 : 0,
+        session.pitchCount ?? null,
+        session.id,
+      ]
+    );
+  }
+
+  async deleteEvent(eventId: string, sessionId: string): Promise<void> {
+    const db = this.getDatabase();
+    await db.run(`DELETE FROM climb_events WHERE id = ? AND session_id = ?`, [
+      eventId,
+      sessionId,
+    ]);
+  }
+
+  async deleteSession(sessionId: string): Promise<void> {
+    const db = this.getDatabase();
+    await db.run(`DELETE FROM sessions WHERE id = ?`, [sessionId]);
+    // Thanks to ON DELETE CASCADE, associated climb_events will also be deleted.
+  }
 
   getDatabase(): SQLiteDBConnection {
     if (!this.db) {
@@ -227,7 +247,7 @@ async updateSession(session: Session): Promise<void> {
     return result.values ?? [];
   }
 
-   async close(): Promise<void> {
+  async close(): Promise<void> {
     if (this.db) {
       try {
         await (this.sqlite as any).closeConnection(this.dbName, false);
