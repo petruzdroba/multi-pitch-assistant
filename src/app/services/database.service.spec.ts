@@ -260,5 +260,57 @@ describe('DatabaseService (detailed)', () => {
           .toBeRejectedWithError('Database not initialized');
       });
     });
+
+    describe('deleteEvent()', () => {
+  it('should delete the event by eventId and sessionId', async () => {
+    await service.deleteEvent('evt123', 'sess123');
+    expect(mockDb.run).toHaveBeenCalledOnceWith(
+      jasmine.stringMatching(/^DELETE FROM climb_events WHERE/),
+      ['evt123', 'sess123']
+    );
+  });
+
+  it('should still call run even if eventId/sessionId does not exist (mocked)', async () => {
+    // Simulate no error, but DB wouldn't find event
+    mockDb.run.and.returnValue(Promise.resolve({ changes: { changes: 0, lastId: 0 } }));
+    await service.deleteEvent('nonexistent_evt', 'nonexistent_sess');
+    expect(mockDb.run).toHaveBeenCalledWith(
+      jasmine.stringMatching(/^DELETE FROM climb_events WHERE/),
+      ['nonexistent_evt', 'nonexistent_sess']
+    );
+  });
+
+  it('should throw if db is not initialized', async () => {
+    (service as any).db = null;
+    await expectAsync(service.deleteEvent('evt', 'sess'))
+      .toBeRejectedWithError('Database not initialized');
+  });
+});
+
+describe('deleteSession()', () => {
+  it('should delete the session by sessionId', async () => {
+    await service.deleteSession('sess456');
+    expect(mockDb.run).toHaveBeenCalledOnceWith(
+      jasmine.stringMatching(/^DELETE FROM sessions WHERE/),
+      ['sess456']
+    );
+  });
+
+  it('should still call run even if sessionId does not exist (mocked)', async () => {
+    mockDb.run.and.returnValue(Promise.resolve({ changes: { changes: 0, lastId: 0 } }));
+    await service.deleteSession('nonexistent_sess');
+    expect(mockDb.run).toHaveBeenCalledWith(
+      jasmine.stringMatching(/^DELETE FROM sessions WHERE/),
+      ['nonexistent_sess']
+    );
+  });
+
+  it('should throw if db is not initialized', async () => {
+    (service as any).db = null;
+    await expectAsync(service.deleteSession('sess'))
+      .toBeRejectedWithError('Database not initialized');
+  });
+});
+
   });
 });
