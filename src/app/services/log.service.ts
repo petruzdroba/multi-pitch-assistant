@@ -1,16 +1,35 @@
-import { computed, Injectable, signal } from '@angular/core';
+import { computed, inject, Injectable, signal } from '@angular/core';
 import { Session } from '../models/session.interface';
 import { ClimbEvent } from '../models/climb-event.interface';
+import { DatabaseService } from './database.service';
 
 @Injectable({ providedIn: 'root' })
 export class LogService {
   private logs = signal<Session[]>([] as Session[]);
+  private dbService = inject(DatabaseService);
 
   readonly logs$ = computed(() => this.logs());
 
+  constructor() {
+    this.init();
+  }
+
+  private async init(): Promise<void> {
+    try {
+      const sessions = await this.dbService.getFullLog().catch((error) => {
+        console.error('Error fetching logs from database:', error);
+        return [];
+      });
+      this.logs.set(sessions);
+    } catch (error) {
+      console.error('Error fetching logs:', error);
+    }
+  }
+
   addSession(session: Session): void {
     this.logs.update((currentLogs) => [...currentLogs, session]);
-    //here add to backend
+    this.dbService.addSession(session).catch((error) => {
+      console.error('Error adding session to database:', error)});
   }
 
   updateEvent(event: ClimbEvent, sessionId: string): void {
@@ -27,8 +46,9 @@ export class LogService {
         return session;
       });
     });
-
-    //here update to backend
+    this.dbService.updateEvent(event, sessionId).catch((error) => {
+      console.error('Error updating event in database:', error);
+    });
   }
 
   updateSession(updatedSession: Session): void {
@@ -39,7 +59,9 @@ export class LogService {
           : session
       )
     );
-    // Add backend update code
+    this.dbService.updateSession(updatedSession).catch((error) => {
+      console.error('Error updating session in database:', error);
+    });
   }
 
   getSessionById(id: string): Session | undefined {

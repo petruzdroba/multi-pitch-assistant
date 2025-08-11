@@ -54,6 +54,23 @@ if ! adb install -r "$APK_PATH"; then
   exit 1
 fi
 
+# # 6) Push pre-populated database (optional)
+# if [ -f "$PREPOP_DB" ]; then
+#   echo "📂 Found pre-populated DB. Pushing to device..."
+#   # Push to a temporary location on sdcard
+#   adb push "$PREPOP_DB" /sdcard/app_db.db
+
+#   # Create databases directory in app’s data area and copy over
+#   adb shell run-as $PACKAGE_NAME mkdir -p databases
+#   adb shell run-as $PACKAGE_NAME cp /sdcard/app_db.db databases/app_db.db
+
+#   # Clean up
+#   adb shell rm /sdcard/app_db.db
+#   echo "✅ Pre-populated DB deployed."
+# else
+#   echo "⚠️  No pre-populated DB found at $PREPOP_DB — skipping."
+# fi
+
 
 cd ..
 

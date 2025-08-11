@@ -1,3 +1,15 @@
 <ion-app>
-  <ion-router-outlet />
+  @if (!dbReady) {
+    <div>Loading database...</div>
+  }
+
+  @if (dbReady) {
+    <div>
+      <ion-router-outlet></ion-router-outlet>
+    </div>
+  }
+
+  @if (error) {
+    <div style="color:red;">{{ error }}</div>
+  }
 </ion-app>
