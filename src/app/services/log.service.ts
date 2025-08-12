@@ -64,6 +64,23 @@ export class LogService {
     });
   }
 
+  deleteEvent(eventId:string, sessionId:string):void{
+    this.logs.update((currentLogs) => {
+      return currentLogs.map((session) => {
+        if (session.id === sessionId) {
+          return {
+            ...session,
+            events: session.events.filter((e) => e.id !== eventId),
+          };
+        }
+        return session;
+      });
+    });
+    this.dbService.deleteEvent(eventId, sessionId).catch((error) => {
+      console.error('Error deleting event from database:', error);
+    });
+  }
+
   getSessionById(id: string): Session | undefined {
     return this.logs().find((session) => session.id === id);
   }

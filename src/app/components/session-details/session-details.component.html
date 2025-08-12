@@ -1,67 +1,86 @@
 <div class="main">
   @if(loadedSession() === undefined){
-  <ion-progress-bar type="indeterminate" class="glass-progress"></ion-progress-bar>
+  <ion-progress-bar
+    type="indeterminate"
+    class="glass-progress"
+  ></ion-progress-bar>
   <!-- <ion-button size="large" color="danger" fill="outline" class="btn-cancel" (click)="onCancel()">Cancel</ion-button> -->
-  <button class="btn-glass-danger btn-cancel" (click)="onCancel()">Cancel</button>
+  <button class="btn-glass-danger btn-cancel" (click)="onCancel()">
+    Cancel
+  </button>
   }@else {
   <div class="header-section">
     <div class="greeting-header">
       <h1 class="greeting-title">Edit your session</h1>
-      <p class="greeting-subtext">{{ loadedSession()?.timeStart | date: 'EEEE, MMMM d, y, H:mm'}}</p>
+      <p class="greeting-subtext">
+        {{ loadedSession()?.timeStart | date : "EEEE, MMMM d, y, H:mm" }}
+      </p>
     </div>
 
     <ion-item>
-      <ion-input class="glass-input" [(ngModel)]="name" (ngModelChange)="onNameChange()" label="Session name" labelPlacement="floating" maxlength="20" counter="true"
-        placeholder="Enter text">
+      <ion-input
+        class="glass-input"
+        [(ngModel)]="name"
+        (ngModelChange)="onNameChange()"
+        label="Session name"
+        labelPlacement="floating"
+        maxlength="20"
+        counter="true"
+        placeholder="Enter text"
+      >
       </ion-input>
     </ion-item>
-
-
   </div>
 
   <div class="scrollable-content">
     <ion-list class="event-list">
-      @for(event of loadedSession()?.events;track event.id){
-
-        @if($first || $last) {
+      @for(event of loadedSession()?.events;track event.id){ @if($first ||
+      $last) {
+      <ion-item class="event-item">
+        <h2 class="event-type">{{ event.type }}</h2>
+        <div class="event-extra">
+          <p class="event-time">
+            {{ event.time | date : "dd/MM/yyyy, HH:mm" }}
+          </p>
+          @if(event.altitude !== undefined){
+          <p class="event-altitude" color="primary">
+            Altitude: {{ event.altitude | number : "1.2-2" }} m
+          </p>
+          }
+        </div>
+      </ion-item>
+      }@else {
+      <ion-item-sliding #slidingItem>
+        <!-- Main content -->
         <ion-item class="event-item">
           <h2 class="event-type">{{ event.type }}</h2>
           <div class="event-extra">
-            <p class="event-time">{{ event.time | date:'dd/MM/yyyy, HH:mm' }}</p>
+            <p class="event-time">
+              {{ event.time | date : "dd/MM/yyyy, HH:mm" }}
+            </p>
             @if(event.altitude !== undefined){
-            <p class="event-altitude" color="primary">Altitude: {{ event.altitude| number:'1.2-2' }} m</p>
+            <p class="event-altitude" color="primary">
+              Altitude: {{ event.altitude | number : "1.2-2" }} m
+            </p>
             }
           </div>
         </ion-item>
-        }@else {
-        <ion-item-sliding #slidingItem>
-          <!-- Main content -->
-          <ion-item class="event-item">
-            <h2 class="event-type">{{ event.type }}</h2>
-            <div class="event-extra">
-              <p class="event-time">{{ event.time | date:'dd/MM/yyyy, HH:mm' }}</p>
-              @if(event.altitude !== undefined){
-              <p class="event-altitude" color="primary">Altitude: {{ event.altitude| number:'1.2-2' }} m</p>
-              }
-            </div>
-          </ion-item>
 
-          <ion-item-options side="start">
-  <ion-item-option class="glass-swipe medium" (click)="openModal(event)">
-    <ion-icon slot="icon-only" name="create"></ion-icon>
-  </ion-item-option>
-</ion-item-options>
+        <ion-item-options side="start">
+          <ion-item-option
+            class="glass-swipe medium"
+            (click)="openModal(event)">
+            <ion-icon slot="icon-only" name="create"></ion-icon>
+          </ion-item-option>
+        </ion-item-options>
 
-<ion-item-options side="end">
-  <ion-item-option class="glass-swipe danger" >
-    <ion-icon slot="icon-only" name="trash"></ion-icon>
-  </ion-item-option>
-</ion-item-options>
-
-        </ion-item-sliding>
-        }
-
-      }
+        <ion-item-options side="end">
+          <ion-item-option class="glass-swipe danger" (click)="onDelete(event)">
+            <ion-icon slot="icon-only" name="trash"></ion-icon>
+          </ion-item-option>
+        </ion-item-options>
+      </ion-item-sliding>
+      } }
     </ion-list>
   </div>
   <ion-fab class="btn-submit" vertical="bottom" horizontal="end" slot="fixed">

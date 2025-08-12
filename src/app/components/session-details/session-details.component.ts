@@ -97,7 +97,9 @@ export class SessionDetailsComponent implements OnInit {
     }
   }
 
-  onDelete(event: ClimbEvent) {}
+  onDelete(event: ClimbEvent) {
+    this.logService.deleteEvent(event.id, this.loadedSession()?.id || '');
+  }
 
   onSubmit() {
     const session = this.loadedSession();
