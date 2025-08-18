@@ -37,8 +37,8 @@ import { FormsModule } from '@angular/forms';
     IonIcon,
     IonItemSliding,
     IonItemOptions,
-    IonItemOption
-],
+    IonItemOption,
+  ],
 })
 export class SessionDetailsComponent implements OnInit {
   private logService = inject(LogService);
@@ -98,7 +98,16 @@ export class SessionDetailsComponent implements OnInit {
   }
 
   onDelete(event: ClimbEvent) {
-    this.logService.deleteEvent(event.id, this.loadedSession()?.id || '');
+    const session = this.loadedSession();
+    if (!session) return;
+
+    this.logService.deleteEvent(event.id, session.id);
+
+    const updatedSession: Session = {
+      ...session,
+      events: session.events.filter((e) => e.id !== event.id),
+    };
+    this.loadedSession.set(updatedSession);
   }
 
   onSubmit() {
