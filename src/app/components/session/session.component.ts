@@ -42,16 +42,6 @@ export class SessionComponent implements CanComponentDeactivate {
     return this.sessionService.session$().events;
   }
 
-  test() {
-    this.sessionService.recordEvent({
-      id: crypto.randomUUID(),
-      time: new Date(),
-      type: 'manual-note',
-      notes: 'Test event',
-      altitude: Math.random() * 1000, // Example altitude
-    });
-  }
-
   async openNoteAlert() {
     const alert = await this.alertCtrl.create({
       header: 'Add Note',
