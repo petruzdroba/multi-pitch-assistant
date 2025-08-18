@@ -15,6 +15,10 @@ export class AltitudeRecorderService {
   private THROTTLE_INTERVAL_MS = 1000; // 1 second throttle
   private MIN_ALTITUDE_CHANGE = 0.29; // minimum meters change to emit
 
+  get lastAltitude(): number | null {
+    return this.altitudeSubject.getValue();
+  }
+
   async startRecording(): Promise<void> {
     try {
       const { available } = await Barometer.isAvailable();

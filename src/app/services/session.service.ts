@@ -64,15 +64,26 @@ export class SessionService {
     await this.startAltitudeRecording();
   }
 
-  recordEvent(event: ClimbEvent): void {
-    this.session.update((session) => {
-      if (!session) return session;
-      return {
-        ...session,
-        events: [...session.events, event],
-      };
-    });
+  recordEvent = (event: ClimbEvent): void => {
+  if (event.altitude === undefined || event.altitude === null) {
+    const lastAltitude = this.altService.lastAltitude; // <- get the number
+    if (lastAltitude !== null && lastAltitude !== undefined) {
+      event.altitude = lastAltitude;
+    } else {
+      console.warn(
+        'No barometer reading available for event, altitude remains undefined.'
+      );
+    }
   }
+
+  this.session.update((session) => {
+    if (!session) return session;
+    return {
+      ...session,
+      events: [...session.events, event],
+    };
+  });
+};
 
   //recorder function, that will have an interval that will record altitude and time, and maybe after it will clasify events and add them
 

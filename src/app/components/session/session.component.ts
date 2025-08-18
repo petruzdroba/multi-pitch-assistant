@@ -1,7 +1,13 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import { Component, inject, ViewEncapsulation } from '@angular/core';
 import { Router } from '@angular/router';
-import { IonList, IonItem } from '@ionic/angular/standalone';
+import {
+  IonList,
+  IonItem,
+  IonFab,
+  IonFabButton,
+  IonIcon,
+} from '@ionic/angular/standalone';
 import { CanComponentDeactivate } from 'src/app/guards/session-exit.guard';
 import { SessionService } from 'src/app/services/session.service';
 import { AlertController } from '@ionic/angular';
@@ -12,7 +18,15 @@ import { Dialog } from '@capacitor/dialog';
   templateUrl: './session.component.html',
   styleUrls: ['./session.component.css'],
   encapsulation: ViewEncapsulation.None,
-  imports: [IonItem, IonList, DatePipe, CommonModule],
+  imports: [
+    IonItem,
+    IonList,
+    DatePipe,
+    CommonModule,
+    IonFab,
+    IonFabButton,
+    IonIcon,
+  ],
 })
 export class SessionComponent implements CanComponentDeactivate {
   private sessionService = inject(SessionService);
@@ -36,6 +50,39 @@ export class SessionComponent implements CanComponentDeactivate {
       notes: 'Test event',
       altitude: Math.random() * 1000, // Example altitude
     });
+  }
+
+  async openNoteAlert() {
+    const alert = await this.alertCtrl.create({
+      header: 'Add Note',
+      inputs: [
+        {
+          name: 'note',
+          type: 'text',
+          placeholder: 'Enter your note',
+        },
+      ],
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel',
+        },
+        {
+          text: 'Add',
+          handler: (data) => {
+            this.sessionService.recordEvent({
+              id: crypto.randomUUID(),
+              time: new Date(),
+              type: 'manual-note',
+              notes: data.note,
+              altitude: undefined,
+            });
+          },
+        },
+      ],
+    });
+
+    await alert.present();
   }
 
   async onEndSession() {
