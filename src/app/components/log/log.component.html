@@ -13,23 +13,40 @@
         Start a new session to see your climbing adventures here!
       </ion-card-content>
     </ion-card>
-    }
-
-    @for(session of getSessions(); track session.id){
-    <ion-card class="glass-card" (click)="onOpenSession(session.id)">
+    } @for(session of getSessions(); track session.id){
+    <ion-card
+      class="glass-card"
+      (click)="onOpenSession(session.id)"
+      (mousedown)="startLongPress(session.id)"
+      (mouseup)="cancelLongPress()"
+      (mouseleave)="cancelLongPress()"
+      (touchstart)="startLongPress(session.id)"
+      (touchend)="cancelLongPress()"
+      (touchcancel)="cancelLongPress()"
+    >
       <ion-card-header>
-        <ion-card-title >
-          {{ session.name ? (session.name + ' on ' + (session.timeStart | date: 'EEE, MMMM d')) : ('Climb on ' +
-          (session.timeStart | date: 'EEE, MMMM d')) }}
+        <ion-card-title>
+          {{
+            session.name
+              ? session.name +
+                " on " +
+                (session.timeStart | date : "EEE, MMMM d")
+              : "Climb on " + (session.timeStart | date : "EEE, MMMM d")
+          }}
         </ion-card-title>
       </ion-card-header>
 
-
-      <ion-card-content >
+      <ion-card-content>
         @if(session.location) {
-        <p><strong>Location:</strong> Lat: {{ session.location.latitude }} Long: {{session.location.longitude}} </p>
+        <p>
+          <strong>Location:</strong> Lat: {{ session.location.latitude }} Long:
+          {{ session.location.longitude }}
+        </p>
         }
-        <p><strong>Duration:</strong> {{ getDuration(session.timeStart, session.timeEnd) }}</p>
+        <p>
+          <strong>Duration:</strong>
+          {{ getDuration(session.timeStart, session.timeEnd) }}
+        </p>
       </ion-card-content>
     </ion-card>
     }

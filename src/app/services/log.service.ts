@@ -81,6 +81,15 @@ export class LogService {
     });
   }
 
+  deleteSession(sessionId: string):void {
+    this.logs.update((currentLogs) =>
+      currentLogs.filter((session) => session.id !== sessionId)
+    );
+    this.dbService.deleteSession(sessionId).catch((error) => {
+      console.error('Error deleting session from database:', error);
+    });
+  }
+
   getSessionById(id: string): Session | undefined {
     return this.logs().find((session) => session.id === id);
   }
