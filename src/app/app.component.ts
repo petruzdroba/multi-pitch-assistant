@@ -1,5 +1,5 @@
 import { IonApp, IonRouterOutlet } from '@ionic/angular/standalone';
-import { Component, inject, OnInit, Renderer2 } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, Renderer2 } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { DatabaseService } from './services/database.service';
@@ -11,7 +11,7 @@ import { DatabaseService } from './services/database.service';
   styleUrls: ['app.component.css'],
   standalone: true,
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private renderer = inject(Renderer2);
   private db = inject(DatabaseService);
@@ -23,9 +23,18 @@ export class AppComponent implements OnInit {
       await this.db.init();
       this.dbReady = true;
     } catch (err: any) {
-      this.error = 'Failed to initialize database';
+      this.error =
+        err.message || 'An error occurred while initializing the database.';
       console.error(err);
     }
+
+    window.addEventListener('beforeunload', async () => {
+      try {
+        await this.db.close();
+      } catch (e) {
+        console.error('Error closing DB on unload:', e);
+      }
+    });
 
     this.router.events
       .pipe(filter((event) => event instanceof NavigationEnd))
@@ -53,5 +62,13 @@ export class AppComponent implements OnInit {
           // fallback
         }
       });
+  }
+
+  async ngOnDestroy() {
+    try {
+      await this.db.close();
+    } catch (err) {
+      console.error('Error closing DB on destroy:', err);
+    }
   }
 }
