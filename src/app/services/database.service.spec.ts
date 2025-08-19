@@ -176,6 +176,67 @@ describe('DatabaseService (detailed)', () => {
       });
     });
 
+    describe('addEvent()', () => {
+      it('should insert a new climb event into the database', async () => {
+        const event: ClimbEvent = {
+          id: 'evt123',
+          time: new Date('2025-01-01T12:34:56Z'),
+          altitude: 123.45,
+          type: 'fall',
+          notes: 'Test note'
+        };
+        const sessionId = 'sess123';
+
+        await service.addEvent(event, sessionId);
+
+        expect(mockDb.run).toHaveBeenCalledOnceWith(
+          jasmine.stringMatching(/^INSERT INTO climb_events/),
+          [
+            event.id,
+            sessionId,
+            event.time.toISOString(),
+            event.altitude,
+            event.type,
+            event.notes
+          ]
+        );
+      });
+
+      it('should handle event without optional fields', async () => {
+        const event: ClimbEvent = {
+          id: 'evt456',
+          time: new Date('2025-01-01T12:00:00Z'),
+          type: 'manual-note'
+        };
+        const sessionId = 'sess456';
+
+        await service.addEvent(event, sessionId);
+
+        expect(mockDb.run).toHaveBeenCalledOnceWith(
+          jasmine.stringMatching(/^INSERT INTO climb_events/),
+          [
+            event.id,
+            sessionId,
+            event.time.toISOString(),
+            undefined,
+            event.type,
+            undefined
+          ]
+        );
+      });
+
+      it('should throw if db is not initialized', async () => {
+        (service as any).db = null;
+        const dummyEvent: ClimbEvent = {
+          id: 'bad',
+          time: new Date(),
+          type: 'fall'
+        };
+        await expectAsync(service.addEvent(dummyEvent, 'some-session'))
+          .toBeRejectedWithError('Database not initialized');
+      });
+    });
+
     describe('updateEvent()', () => {
       it('should update the climb event in the database', async () => {
         const event: ClimbEvent = {
