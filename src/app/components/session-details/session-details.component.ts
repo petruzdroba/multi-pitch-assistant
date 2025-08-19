@@ -18,6 +18,7 @@ import {
 import { CommonModule, DatePipe } from '@angular/common';
 import { ClimbEvent } from 'src/app/models/climb-event.interface';
 import { EditEventModalComponent } from './edit-event-modal/edit-event-modal.component';
+import { AddEventModalComponent } from './add-event-modal/add-event-modal.component';
 import { FormsModule } from '@angular/forms';
 
 @Component({
@@ -50,7 +51,7 @@ export class SessionDetailsComponent implements OnInit {
 
   constructor(private route: ActivatedRoute) {}
 
-  async openModal(event: ClimbEvent | undefined = undefined) {
+  async openEditModal(event: ClimbEvent) {
     const modal = await this.modalController.create({
       component: EditEventModalComponent,
       componentProps: { event: event, sessionId: this.loadedSession()?.id },
@@ -71,6 +72,26 @@ export class SessionDetailsComponent implements OnInit {
         this.loadedSession.set(updatedSession);
         this.logService.updateEvent(updatedEvent, session.id);
       }
+    }
+  }
+
+  async openAddModal() {
+    const session = this.loadedSession();
+    if (!session) return;
+
+    const modal = await this.modalController.create({
+      component: AddEventModalComponent,
+      componentProps: { sessionId: session.id },
+    });
+    modal.present();
+    const { data: newEvent, role } = await modal.onWillDismiss();
+
+    if (role === 'confirm' && newEvent) {
+      const updatedSession: Session = {
+        ...session,
+        events: [...session.events, newEvent],
+      };
+      this.loadedSession.set(updatedSession);
     }
   }
 

@@ -69,7 +69,7 @@
         <ion-item-options side="start">
           <ion-item-option
             class="glass-swipe medium"
-            (click)="openModal(event)">
+            (click)="openEditModal(event)">
             <ion-icon slot="icon-only" name="create"></ion-icon>
           </ion-item-option>
         </ion-item-options>
@@ -86,6 +86,12 @@
   <ion-fab class="btn-submit" vertical="bottom" horizontal="end" slot="fixed">
     <ion-fab-button (click)="onSubmit()">
       <ion-icon name="checkmark"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+
+  <ion-fab vertical="bottom" horizontal="start" slot="fixed">
+    <ion-fab-button (click)="openAddModal()">
+      <ion-icon name="add"></ion-icon>
     </ion-fab-button>
   </ion-fab>
 
