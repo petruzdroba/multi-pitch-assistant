@@ -75,6 +75,21 @@ ion-input.glass-input {
   --highlight-color-focused: rgba(255, 255, 255, 0.3);
 }
 
+body, ion-app, ion-content {
+  user-select: none;       /* standard */
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none;    /* Firefox */
+  -ms-user-select: none;     /* IE/Edge */
+}
+
+/* Allow text selection on inputs, textareas, and contenteditable */
+input, textarea, [contenteditable] {
+  user-select: text;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+}
+
 
 .btn-glass {
   padding: 12px 24px;

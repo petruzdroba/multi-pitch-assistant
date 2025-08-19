@@ -1,7 +1,6 @@
 <div class="main">
   <!-- <ion-button size="large" fill="outline" class="btn-action" (click)="onEndSession()">End Climbing</ion-button> -->
   <button class="btn-glass" role="button" (click)="onEndSession()">End Climbing</button>
-  <button (click)="test()">Add test event</button>
   <ion-list class="event-list">
     @for(event of getEvents();track event.id){
       <ion-item class="event-item">
@@ -15,4 +14,9 @@
       </ion-item>
     }
   </ion-list>
+  <ion-fab class="btn-submit" vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button (click)="openNoteAlert()">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
 </div>

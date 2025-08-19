@@ -87,6 +87,26 @@ export class DatabaseService {
     `);
   }
 
+  async addEvent(event: ClimbEvent, sessionId: string): Promise<void> {
+    const db = this.getDatabase();
+
+    if (!db) throw new Error('Database not initialized');
+
+    await db.run(
+      `INSERT INTO climb_events
+        (id, session_id, time, altitude, type, notes)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [
+        event.id,
+        sessionId,
+        event.time.toISOString(),
+        event.altitude,
+        event.type,
+        event.notes,
+      ]
+    );
+  }
+
   async addSession(session: Session): Promise<void> {
     const db = this.getDatabase();
 

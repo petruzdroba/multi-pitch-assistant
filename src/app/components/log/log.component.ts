@@ -7,6 +7,7 @@ import {
   IonCardTitle,
   IonCardHeader,
   IonCardContent,
+  AlertController,
 } from '@ionic/angular/standalone';
 import { Router } from '@angular/router';
 
@@ -20,6 +21,10 @@ import { Router } from '@angular/router';
 export class LogComponent {
   private logService = inject(LogService);
   private routerService = inject(Router);
+  private alertCtrl = inject(AlertController);
+
+  private longPressTimeout: any;
+  private longPressTriggered: boolean = false;
 
   getSessions(): Session[] {
     return this.logService.logs$();
@@ -42,6 +47,47 @@ export class LogComponent {
   }
 
   onOpenSession(sessionId: string) {
+    if (this.longPressTriggered) return;
     this.routerService.navigate(['/tabs/session-details', sessionId]);
+  }
+
+  startLongPress(sessionId: string) {
+    this.longPressTriggered = false;
+    clearTimeout(this.longPressTimeout);
+
+    this.longPressTimeout = setTimeout(() => {
+      this.longPressTriggered = true;
+      this.onLongPress(sessionId);
+    }, 600);
+  }
+
+  cancelLongPress() {
+    clearTimeout(this.longPressTimeout);
+    this.longPressTimeout = null;
+  }
+
+  async onLongPress(sessionId: string) {
+    const alert = await this.alertCtrl.create({
+      header: 'Confirm Delete',
+      message: 'Do you really want to delete this session?',
+      cssClass: 'alert-glass',
+      backdropDismiss: true,
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel',
+        },
+        {
+          text: 'Delete',
+          role: 'destructive',
+          cssClass: 'btn-glass',
+          handler: () => {
+            this.logService.deleteSession(sessionId)
+          },
+        },
+      ],
+    });
+
+    await alert.present();
   }
 }

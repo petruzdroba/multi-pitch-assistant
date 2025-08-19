@@ -18,6 +18,7 @@ import {
 import { CommonModule, DatePipe } from '@angular/common';
 import { ClimbEvent } from 'src/app/models/climb-event.interface';
 import { EditEventModalComponent } from './edit-event-modal/edit-event-modal.component';
+import { AddEventModalComponent } from './add-event-modal/add-event-modal.component';
 import { FormsModule } from '@angular/forms';
 
 @Component({
@@ -37,8 +38,8 @@ import { FormsModule } from '@angular/forms';
     IonIcon,
     IonItemSliding,
     IonItemOptions,
-    IonItemOption
-],
+    IonItemOption,
+  ],
 })
 export class SessionDetailsComponent implements OnInit {
   private logService = inject(LogService);
@@ -50,7 +51,22 @@ export class SessionDetailsComponent implements OnInit {
 
   constructor(private route: ActivatedRoute) {}
 
-  async openModal(event: ClimbEvent | undefined = undefined) {
+  private sortEventsByTime(events: ClimbEvent[]): ClimbEvent[] {
+    return [...events].sort((a, b) => {
+      // Always keep session-started first
+      if (a.type === 'session-started') return -1;
+      if (b.type === 'session-started') return 1;
+
+      // Always keep session-ended last
+      if (a.type === 'session-ended') return 1;
+      if (b.type === 'session-ended') return -1;
+
+      // Sort other events by time
+      return a.time.getTime() - b.time.getTime();
+    });
+  }
+
+  async openEditModal(event: ClimbEvent) {
     const modal = await this.modalController.create({
       component: EditEventModalComponent,
       componentProps: { event: event, sessionId: this.loadedSession()?.id },
@@ -61,11 +77,13 @@ export class SessionDetailsComponent implements OnInit {
     if (role === 'confirm') {
       const session = this.loadedSession();
       if (session) {
+        const updatedEvents = session.events.map((e) =>
+          e.id === updatedEvent.id ? { ...e, ...updatedEvent } : e
+        );
+
         const updatedSession: Session = {
           ...session,
-          events: session.events.map((e) =>
-            e.id === updatedEvent.id ? { ...e, ...updatedEvent } : e
-          ),
+          events: this.sortEventsByTime(updatedEvents),
         };
 
         this.loadedSession.set(updatedSession);
@@ -74,13 +92,40 @@ export class SessionDetailsComponent implements OnInit {
     }
   }
 
+  async openAddModal() {
+    const session = this.loadedSession();
+    if (!session) return;
+
+    const modal = await this.modalController.create({
+      component: AddEventModalComponent,
+      componentProps: { sessionId: session.id },
+    });
+    modal.present();
+    const { data: newEvent, role } = await modal.onWillDismiss();
+
+    if (role === 'confirm' && newEvent) {
+      const updatedSession: Session = {
+        ...session,
+        events: this.sortEventsByTime([...session.events, newEvent]),
+      };
+      this.loadedSession.set(updatedSession);
+    }
+  }
+
   ngOnInit() {
     this.route.params.subscribe((params) => {
       const sessionId = params['id'];
       const session = this.logService.getSessionById(sessionId);
-      this.loadedSession.set(session);
-      if (session?.name) {
-        this.name = session.name;
+      if (session) {
+        // Sort events by time when loading the session
+        const sortedSession = {
+          ...session,
+          events: this.sortEventsByTime(session.events)
+        };
+        this.loadedSession.set(sortedSession);
+        if (sortedSession.name) {
+          this.name = sortedSession.name;
+        }
       }
     });
   }
@@ -97,7 +142,18 @@ export class SessionDetailsComponent implements OnInit {
     }
   }
 
-  onDelete(event: ClimbEvent) {}
+  onDelete(event: ClimbEvent) {
+    const session = this.loadedSession();
+    if (!session) return;
+
+    this.logService.deleteEvent(event.id, session.id);
+
+    const updatedSession: Session = {
+      ...session,
+      events: this.sortEventsByTime(session.events.filter((e) => e.id !== event.id)),
+    };
+    this.loadedSession.set(updatedSession);
+  }
 
   onSubmit() {
     const session = this.loadedSession();
