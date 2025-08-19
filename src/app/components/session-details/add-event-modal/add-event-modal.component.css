@@ -1,0 +1,26 @@
+.main {
+  height: 100%;
+  background-image: url('../../../../assets/images/lapnor.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+.glass-form {
+  padding: 1rem;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+ion-item {
+  margin-bottom: 1rem;
+  --background: transparent;
+}
+
+ion-select, ion-input, ion-textarea {
+  --background: rgba(255, 255, 255, 0.05);
+  border-radius: 5px;
+  margin-top: 0.5rem;
+}
