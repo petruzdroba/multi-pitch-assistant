@@ -65,25 +65,39 @@ export class SessionService {
   }
 
   recordEvent = (event: ClimbEvent): void => {
-  if (event.altitude === undefined || event.altitude === null) {
-    const lastAltitude = this.altService.lastAltitude; // <- get the number
-    if (lastAltitude !== null && lastAltitude !== undefined) {
-      event.altitude = lastAltitude;
-    } else {
-      console.warn(
-        'No barometer reading available for event, altitude remains undefined.'
-      );
-    }
-  }
+    const current = this.session();
 
-  this.session.update((session) => {
-    if (!session) return session;
-    return {
-      ...session,
-      events: [...session.events, event],
-    };
-  });
-};
+    // Ensure session has started
+    if (!current?.events?.some((e) => e.type === 'session-started')) {
+      console.warn('Cannot record event: session has not started.');
+      return;
+    }
+
+    // Prevent recording after session ended
+    if (current.events.some((e) => e.type === 'session-ended')) {
+      console.warn('Cannot record event: session has ended.');
+      return;
+    }
+
+    if (event.altitude === undefined || event.altitude === null) {
+      const lastAltitude = this.altService.lastAltitude; // <- get the number
+      if (lastAltitude !== null && lastAltitude !== undefined) {
+        event.altitude = lastAltitude;
+      } else {
+        console.warn(
+          'No barometer reading available for event, altitude remains undefined.'
+        );
+      }
+    }
+
+    this.session.update((session) => {
+      if (!session) return session;
+      return {
+        ...session,
+        events: [...session.events, event],
+      };
+    });
+  };
 
   //recorder function, that will have an interval that will record altitude and time, and maybe after it will clasify events and add them
 
