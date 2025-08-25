@@ -12,6 +12,26 @@ A mobile application for tracking and analyzing multi-pitch climbing sessions us
 
 Multi-Pitch Assistant is an Ionic/Angular mobile application that helps climbers track their climbing sessions with automatic event detection. The app uses the device's barometer to monitor altitude changes and intelligently classifies climbing events such as falls, rests, and pitch changes.
 
+## License
+
+This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for details.
+
+---
+
+## Usage
+
+You are welcome to **use, modify, and experiment** with this project for **personal or educational purposes**.
+
+**Commercial use is not encouraged or supported.** If you plan to use this project commercially, please **contact the author** for permission.
+
+---
+
+## Disclaimer
+
+This project is provided under the MIT License. While commercial use is technically allowed, the author requests that it be used primarily for learning, personal projects, or educational purposes.
+
+---
+
 ### Key Features
 
 - **Real-time Altitude Monitoring**: Uses device barometer for precise altitude tracking
