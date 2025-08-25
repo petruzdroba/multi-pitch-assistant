@@ -2,6 +2,12 @@
 
 A mobile application for tracking and analyzing multi-pitch climbing sessions using real-time altitude monitoring and event classification.
 
+![Android](https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white)
+![Ionic](https://img.shields.io/badge/Ionic-%233880FF.svg?style=for-the-badge&logo=Ionic&logoColor=white)
+![Angular](https://img.shields.io/badge/angular-%23DD0031.svg?style=for-the-badge&logo=angular&logoColor=white)
+![SQLite](https://img.shields.io/badge/sqlite-%2307405e.svg?style=for-the-badge&logo=sqlite&logoColor=white)
+![Jasmine](https://img.shields.io/badge/jasmine-%238A4182.svg?style=for-the-badge&logo=jasmine&logoColor=white)
+
 ## 📱 Overview
 
 Multi-Pitch Assistant is an Ionic/Angular mobile application that helps climbers track their climbing sessions with automatic event detection. The app uses the device's barometer to monitor altitude changes and intelligently classifies climbing events such as falls, rests, and pitch changes.
@@ -247,6 +253,10 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [ ] Export functionality
 
 ---
+
+<img src="https://github.com/user-attachments/assets/2e7303ef-bbdf-4d48-8f72-17c0fb6e352e" width="300"/>
+<img src="https://github.com/user-attachments/assets/78c7203a-4ba7-42fc-9624-23c94694efeb" width="300"/>
+<img src="https://github.com/user-attachments/assets/616114bb-defe-4b4c-b33d-7e6f53b55e4d" width="300"/>
 
 **Note**: This app requires a device with a barometer sensor for altitude monitoring functionality. GPS is used for location tracking and is optional.
 
