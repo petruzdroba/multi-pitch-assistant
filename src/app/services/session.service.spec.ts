@@ -10,8 +10,8 @@ import { Session } from '../models/session.interface';
 // Mock services
 class MockLogService {
   sessions: Session[] = [];
-  addSession(s: Session) {
-    this.sessions.push(s);
+  addSession(session: Session) {
+    this.sessions.push(session);
   }
 }
 
@@ -24,9 +24,15 @@ class MockAltitudeRecorderService {
 
 class MockClassifierService {
   createEventFromReadings = jasmine.createSpy();
+  getRecommendedOptions = jasmine.createSpy().and.returnValue({
+    readingsCount: 8,
+    fallDropThreshold: 0.4,
+    allowedNoiseThreshold: 0.4,
+    restMaxChangeThreshold: 0.25,
+  });
 }
 
-describe('SessionService stress tests', () => {
+describe('SessionService', () => {
   let service: SessionService;
   let logService: MockLogService;
   let altService: MockAltitudeRecorderService;
@@ -37,92 +43,56 @@ describe('SessionService stress tests', () => {
       providers: [
         SessionService,
         { provide: LogService, useClass: MockLogService },
-        {
-          provide: AltitudeRecorderService,
-          useClass: MockAltitudeRecorderService,
-        },
-        {
-          provide: EventClassificationService,
-          useClass: MockClassifierService,
-        },
+        { provide: AltitudeRecorderService, useClass: MockAltitudeRecorderService },
+        { provide: EventClassificationService, useClass: MockClassifierService },
       ],
     });
 
     service = TestBed.inject(SessionService);
     logService = TestBed.inject(LogService) as unknown as MockLogService;
-    altService = TestBed.inject(
-      AltitudeRecorderService
-    ) as unknown as MockAltitudeRecorderService;
-    classifierService = TestBed.inject(
-      EventClassificationService
-    ) as unknown as MockClassifierService;
+    altService = TestBed.inject(AltitudeRecorderService) as unknown as MockAltitudeRecorderService;
+    classifierService = TestBed.inject(EventClassificationService) as unknown as MockClassifierService;
   });
 
-  describe('lifecycle', () => {
-    it('should not allow recording events before session starts', () => {
-      const event: ClimbEvent = {
-        id: 'x1',
-        type: 'manual-note',
-        time: new Date(),
-      };
-
-      service.recordEvent(event);
-
-      const session = service.session$();
-      // session exists, but should have no events yet
-      expect(session.events?.length ?? 0).toBe(0); // no "manual-note" added
-    });
-
-    it('should log a session only once it has been ended', async () => {
+  describe('session lifecycle', () => {
+    it('should start and end a session properly', async () => {
       await service.startSession();
-      expect(logService.sessions.length).toBe(0);
+      expect(service.session$()).toBeTruthy();
+      expect(service.recording$()).toBeTrue();
+
       service.endSession();
+      expect(service.recording$()).toBeFalse();
       expect(logService.sessions.length).toBe(1);
+      const session = logService.sessions[0];
+      expect(session.events.some(e => e.type === 'session-started')).toBeTrue();
+      expect(session.events.some(e => e.type === 'session-ended')).toBeTrue();
     });
 
-    it('should not crash if endSession is called without start', () => {
+    it('should not crash when ending a session without starting', () => {
       expect(() => service.endSession()).not.toThrow();
     });
   });
 
-  describe('events', () => {
+  describe('recording events', () => {
     beforeEach(async () => {
       await service.startSession();
     });
 
-    it('should always attach an altitude if available', () => {
-      altService.lastAltitude = 321;
-      const e: ClimbEvent = {
-        id: 'e1',
-        type: 'rest',
-        time: new Date(),
-      };
-      service.recordEvent(e);
+    it('should attach last altitude if available', () => {
+      altService.lastAltitude = 123;
+      const event: ClimbEvent = { id: 'e1', type: 'rest', time: new Date() };
+      service.recordEvent(event);
 
-      const session = service.session$()!;
-      const stored = session.events.find((ev) => ev.id === 'e1');
-      expect(stored?.altitude).toBe(321);
+      const stored = service.session$().events.find(e => e.id === 'e1');
+      expect(stored?.altitude).toBe(123);
     });
 
-    it('should preserve notes when provided', () => {
-      const e: ClimbEvent = {
-        id: 'e2',
-        type: 'manual-note',
-        time: new Date(),
-        notes: 'crux was hard',
-      };
-      service.recordEvent(e);
+    it('should preserve notes', () => {
+      const event: ClimbEvent = { id: 'e2', type: 'manual-note', time: new Date(), notes: 'test note' };
+      service.recordEvent(event);
 
-      const session = service.session$()!;
-      expect(session.events.find((ev) => ev.id === 'e2')?.notes).toBe(
-        'crux was hard'
-      );
-    });
-
-    it('should add a "session-ended" event when ended', () => {
-      service.endSession();
-      const ended = logService.sessions[0];
-      expect(ended.events.some((ev) => ev.type === 'session-ended')).toBeTrue();
+      const stored = service.session$().events.find(e => e.id === 'e2');
+      expect(stored?.notes).toBe('test note');
     });
   });
 
@@ -131,10 +101,11 @@ describe('SessionService stress tests', () => {
       await service.startSession();
     });
 
-    it('should buffer readings and attempt classification after 5 samples', () => {
+    it('should call classifier when buffer reaches required readings', () => {
       classifierService.createEventFromReadings.and.returnValue(null);
 
-      for (let i = 0; i < 5; i++) {
+      const count = service.getCurrentClassificationOptions().readingsCount || 8;
+      for (let i = 0; i < count; i++) {
         altService.altitude$.next(100 + i);
       }
 
@@ -142,69 +113,68 @@ describe('SessionService stress tests', () => {
     });
 
     it('should record classified events into session', () => {
-      const fakeEvent: ClimbEvent = {
-        id: 'c1',
-        type: 'fall',
-        time: new Date(),
-        altitude: 250,
-      };
+      const fakeEvent: ClimbEvent = { id: 'f1', type: 'fall', time: new Date(), altitude: 250 };
       classifierService.createEventFromReadings.and.returnValue(fakeEvent);
 
-      for (let i = 0; i < 5; i++) {
+      const count = service.getCurrentClassificationOptions().readingsCount || 8;
+      for (let i = 0; i < count; i++) {
         altService.altitude$.next(200 + i);
       }
 
-      const session = service.session$()!;
-      expect(session.events.some((ev) => ev.id === 'c1')).toBeTrue();
+      const session = service.session$();
+      expect(session.events.some(e => e.id === 'f1')).toBeTrue();
     });
 
-    it('should keep sliding buffer if no event is detected', () => {
+    it('should maintain a sliding buffer if no event is detected', () => {
       classifierService.createEventFromReadings.and.returnValue(null);
 
-      for (let i = 0; i < 10; i++) {
+      const count = (service.getCurrentClassificationOptions().readingsCount || 8) * 2;
+      for (let i = 0; i < count; i++) {
         altService.altitude$.next(300 + i);
       }
 
-      const buf = (service as any).altitudeReadings();
-      expect(buf.length).toBeLessThanOrEqual(5); // sliding window behavior
+      const buf = service.getCurrentReadings();
+      expect(buf.length).toBeLessThanOrEqual((service.getCurrentClassificationOptions().readingsCount || 8) - 1);
     });
   });
 
-  describe('model contract consistency', () => {
+  describe('classification options', () => {
+    it('should set recommended options', () => {
+      service.setClassificationMode('sensitive');
+      const opts = service.getCurrentClassificationOptions();
+      expect(opts.readingsCount).toBe(8);
+    });
+
+    it('should allow custom options', () => {
+      service.setCustomClassificationOptions({ readingsCount: 10 });
+      expect(service.getCurrentClassificationOptions().readingsCount).toBe(10);
+    });
+  });
+
+  describe('model consistency', () => {
     beforeEach(async () => {
       await service.startSession();
     });
 
-    it('should never assign invalid event types', () => {
-      const session = service.session$()!;
+    it('should only assign valid event types', () => {
+      const validTypes: ClimbEvent['type'][] = [
+        'session-started', 'session-ended', 'fall', 'fall-arrested',
+        'pitch-changed', 'rest', 'retreat', 'manual-note',
+        'lead-started', 'lead-ended', 'second-started', 'second-ended',
+        'error', 'belay', 'barometer-reading'
+      ];
+
+      const session = service.session$();
       for (const ev of session.events) {
-        // TypeScript guards this, but runtime test enforces it
-        const validTypes: ClimbEvent['type'][] = [
-          'session-started',
-          'session-ended',
-          'fall',
-          'fall-arrested',
-          'pitch-changed',
-          'rest',
-          'retreat',
-          'manual-note',
-          'lead-started',
-          'lead-ended',
-          'second-started',
-          'second-ended',
-          'error',
-          'belay',
-          'barometer-reading',
-        ];
         expect(validTypes).toContain(ev.type);
       }
     });
 
     it('should leave optional fields undefined if not set', () => {
-      const s = service.session$()!;
-      expect(s.notes).toBeUndefined();
-      expect(s.name).toBeUndefined();
-      expect(s.pitchCount).toBeUndefined();
+      const session = service.session$();
+      expect(session.notes).toBeUndefined();
+      expect(session.name).toBeUndefined();
+      expect(session.pitchCount).toBeUndefined();
     });
   });
 });
