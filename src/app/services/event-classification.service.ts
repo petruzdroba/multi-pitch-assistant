@@ -28,10 +28,14 @@ export class EventClassificationService {
     const smoothed = [readings[0]]; // Keep first reading as-is
 
     for (let i = 1; i < readings.length - 1; i++) {
-      const avg = (readings[i - 1].altitude + readings[i].altitude + readings[i + 1].altitude) / 3;
+      const avg =
+        (readings[i - 1].altitude +
+          readings[i].altitude +
+          readings[i + 1].altitude) /
+        3;
       smoothed.push({
         ...readings[i],
-        altitude: avg
+        altitude: avg,
       });
     }
 
@@ -47,47 +51,52 @@ export class EventClassificationService {
     return deltas;
   }
 
-  private detectRest(readings: AltitudeReading[], restMaxChange: number): boolean {
+  private detectRest(
+    readings: AltitudeReading[],
+    restMaxChange: number
+  ): boolean {
     // Check time span - rest should happen within reasonable time
-    const timeSpan = Number(readings[readings.length - 1].time) - Number(readings[0].time);
-    if (timeSpan > 8000) { // More than 8 seconds is too long for rest
+    const timeSpan =
+      Number(readings[readings.length - 1].time) - Number(readings[0].time);
+    if (timeSpan > 8000) {
+      // More than 8 seconds is too long for rest
       return false;
     }
 
     // Calculate standard deviation to measure stability
-    const altitudes = readings.map(r => r.altitude);
-    const mean = altitudes.reduce((sum, alt) => sum + alt, 0) / altitudes.length;
-    const variance = altitudes.reduce((sum, alt) => sum + Math.pow(alt - mean, 2), 0) / altitudes.length;
+    const altitudes = readings.map((r) => r.altitude);
+    const mean =
+      altitudes.reduce((sum, alt) => sum + alt, 0) / altitudes.length;
+    const variance =
+      altitudes.reduce((sum, alt) => sum + Math.pow(alt - mean, 2), 0) /
+      altitudes.length;
     const stdDev = Math.sqrt(variance);
 
     // For rest, standard deviation should be very low
     return stdDev <= restMaxChange;
   }
 
-  private detectFall(deltas: number[], fallDrop: number, noiseThresh: number): boolean {
+  private detectFall(
+    deltas: number[],
+    fallDrop: number,
+    noiseThresh: number
+  ): boolean {
     if (deltas.length < 4) return false;
 
-    // Look for pattern: climb -> significant drop -> recovery/stabilization
+    // Require some initial climb (first half of readings) above a minimal threshold
     const firstHalf = Math.floor(deltas.length / 2);
     const climbPhase = deltas.slice(0, firstHalf);
-    const fallPhase = deltas.slice(firstHalf);
-
-    // Check for initial climbing (at least some positive movement)
-    const hasClimb = climbPhase.some(d => d > noiseThresh);
+    const hasClimb = climbPhase.some((d) => d > noiseThresh / 2); // permissive: half of noiseThresh
     if (!hasClimb) return false;
 
-    // Look for significant drop
-    const hasSignificantDrop = fallPhase.some(d => d <= -fallDrop);
-    if (!hasSignificantDrop) return false;
+    // Look for any significant drop beyond noise threshold
+    const dropIndex = deltas.findIndex(
+      (d) => d <= -fallDrop && d <= -noiseThresh
+    );
+    if (dropIndex === -1) return false;
 
-    // Check that the drop is followed by less severe changes (recovery)
-    const dropIndex = fallPhase.findIndex(d => d <= -fallDrop);
-    if (dropIndex === -1 || dropIndex === fallPhase.length - 1) return false;
-
-    const afterDrop = fallPhase.slice(dropIndex + 1);
-    const hasRecovery = afterDrop.every(d => d > -fallDrop);
-
-    return hasRecovery;
+    // No recovery requirement — falling means you stay down
+    return true;
   }
 
   private detectRetreat(deltas: number[], noiseThresh: number): boolean {
@@ -99,14 +108,21 @@ export class EventClassificationService {
     const stabilizationPhase = deltas.slice(declineCount);
 
     // Check for consistent decline (most readings should be negative)
-    const negativeCount = declinePhase.filter(d => d < -noiseThresh / 2).length;
+    const negativeCount = declinePhase.filter(
+      (d) => d < -noiseThresh / 2
+    ).length;
     const declineRatio = negativeCount / declinePhase.length;
 
     if (declineRatio < 0.6) return false; // At least 60% should be declining
 
     // Check for stabilization (small changes)
-    const stableCount = stabilizationPhase.filter(d => Math.abs(d) <= noiseThresh).length;
-    const stabilizationRatio = stabilizationPhase.length > 0 ? stableCount / stabilizationPhase.length : 1;
+    const stableCount = stabilizationPhase.filter(
+      (d) => Math.abs(d) <= noiseThresh
+    ).length;
+    const stabilizationRatio =
+      stabilizationPhase.length > 0
+        ? stableCount / stabilizationPhase.length
+        : 1;
 
     return stabilizationRatio >= 0.7; // At least 70% should be stable
   }
@@ -122,15 +138,17 @@ export class EventClassificationService {
     }
 
     const fallDrop = options.fallDropThreshold ?? this.DEFAULT_FALL_DROP;
-    const noiseThresh = options.allowedNoiseThreshold ?? this.DEFAULT_NOISE_THRESHOLD;
-    const restMaxChange = options.restMaxChangeThreshold ?? this.DEFAULT_REST_MAX_CHANGE;
+    const noiseThresh =
+      options.allowedNoiseThreshold ?? this.DEFAULT_NOISE_THRESHOLD;
+    const restMaxChange =
+      options.restMaxChangeThreshold ?? this.DEFAULT_REST_MAX_CHANGE;
 
     // Apply smoothing to reduce sensor noise
     const smoothedReadings = this.smoothReadings(readings);
 
     // Sort by time to ensure proper sequence
-    const sortedReadings = [...smoothedReadings].sort((a, b) =>
-      Number(a.time) - Number(b.time)
+    const sortedReadings = [...smoothedReadings].sort(
+      (a, b) => Number(a.time) - Number(b.time)
     );
 
     // Check for rest first (most stable pattern)
@@ -151,7 +169,9 @@ export class EventClassificationService {
 
     if (isFall && isRetreat) {
       // Both patterns detected - use total change to decide
-      const totalChange = sortedReadings[sortedReadings.length - 1].altitude - sortedReadings[0].altitude;
+      const totalChange =
+        sortedReadings[sortedReadings.length - 1].altitude -
+        sortedReadings[0].altitude;
       const maxDrop = Math.min(...deltas);
 
       // If there's a very significant single drop, it's likely a fall
@@ -168,7 +188,9 @@ export class EventClassificationService {
     const type = this.classify(readings, options);
     if (!type) return null;
 
-    const sortedReadings = [...readings].sort((a, b) => Number(a.time) - Number(b.time));
+    const sortedReadings = [...readings].sort(
+      (a, b) => Number(a.time) - Number(b.time)
+    );
     const last = sortedReadings[sortedReadings.length - 1];
 
     return {
@@ -183,7 +205,9 @@ export class EventClassificationService {
     return this.DEFAULT_READINGS_COUNT;
   }
 
-  getRecommendedOptions(scenario: 'sensitive' | 'balanced' | 'conservative'): ClassificationOptions {
+  getRecommendedOptions(
+    scenario: 'sensitive' | 'balanced' | 'conservative'
+  ): ClassificationOptions {
     switch (scenario) {
       case 'sensitive':
         return {
