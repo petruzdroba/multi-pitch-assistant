@@ -2,7 +2,12 @@ import { Injectable } from '@angular/core';
 import { ClimbEvent } from '../models/climb-event.interface';
 import { AltitudeReading } from '../models/altitude-reading.interface';
 
-export type ClassifiedType = 'fall' | 'retreat' | 'rest' | null;
+export type ClassifiedType =
+  | 'fall'
+  | 'retreat'
+  | 'rest'
+  | 'pitch-changed'
+  | null;
 
 export interface ClassificationOptions {
   /** Minimum drop in one reading to be considered a fall (meters). */
@@ -13,6 +18,10 @@ export interface ClassificationOptions {
   restMaxChangeThreshold?: number;
   /** Number of readings to use for classification. */
   readingsCount?: number;
+
+  pitchChangeAltitudeThreshold?: number;
+  /** Minimum rest time after climb to confirm pitch change (seconds). */
+  pitchChangeRestTimeThreshold?: number;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -21,6 +30,8 @@ export class EventClassificationService {
   private readonly DEFAULT_FALL_DROP = 0.4;
   private readonly DEFAULT_READINGS_COUNT = 8; // Increased from 5
   private readonly DEFAULT_REST_MAX_CHANGE = 0.25;
+  private readonly DEFAULT_PITCH_ALTITUDE_THRESHOLD = 8; // meters
+  private readonly DEFAULT_PITCH_REST_TIME_THRESHOLD = 10; // seconds
 
   private smoothReadings(readings: AltitudeReading[]): AltitudeReading[] {
     if (readings.length < 3) return readings;
@@ -127,13 +138,44 @@ export class EventClassificationService {
     return stabilizationRatio >= 0.7; // At least 70% should be stable
   }
 
+  private detectPitchChange(
+    readings: AltitudeReading[],
+    altitudeThreshold: number,
+    restTimeThreshold: number
+  ): boolean {
+    if (readings.length < 6) return false;
+
+    const totalGain =
+      readings[readings.length - 1].altitude - readings[0].altitude;
+    if (totalGain < altitudeThreshold) return false;
+
+    const midPoint = Math.floor(readings.length * 0.6);
+    const climbPhase = readings.slice(0, midPoint);
+    const restPhase = readings.slice(midPoint);
+
+    const climbGain =
+      climbPhase[climbPhase.length - 1].altitude - climbPhase[0].altitude;
+    if (climbGain / totalGain < 0.7) return false;
+
+    if (restPhase.length < 3) return false;
+    const restAltitudes = restPhase.map((r) => r.altitude);
+    const restVariation =
+      Math.max(...restAltitudes) - Math.min(...restAltitudes);
+    if (restVariation > 1.5) return false;
+
+    const restDuration =
+      Number(restPhase[restPhase.length - 1].time) - Number(restPhase[0].time);
+    if (restDuration / 1000 < restTimeThreshold) return false;
+
+    return true;
+  }
+
   classify(
     readings: AltitudeReading[],
     options: ClassificationOptions = {}
   ): ClassifiedType {
-    const readingsCount = options.readingsCount ?? this.DEFAULT_READINGS_COUNT;
-
-    if (!readings || readings.length !== readingsCount) {
+    const expectedCount = options.readingsCount ?? this.DEFAULT_READINGS_COUNT;
+    if (!readings || readings.length !== expectedCount) {
       return null;
     }
 
@@ -142,40 +184,34 @@ export class EventClassificationService {
       options.allowedNoiseThreshold ?? this.DEFAULT_NOISE_THRESHOLD;
     const restMaxChange =
       options.restMaxChangeThreshold ?? this.DEFAULT_REST_MAX_CHANGE;
+    const pitchAltThresh =
+      options.pitchChangeAltitudeThreshold ??
+      this.DEFAULT_PITCH_ALTITUDE_THRESHOLD;
+    const pitchRestThresh =
+      options.pitchChangeRestTimeThreshold ??
+      this.DEFAULT_PITCH_REST_TIME_THRESHOLD;
 
-    // Apply smoothing to reduce sensor noise
-    const smoothedReadings = this.smoothReadings(readings);
-
-    // Sort by time to ensure proper sequence
-    const sortedReadings = [...smoothedReadings].sort(
+    const smoothed = this.smoothReadings(readings);
+    const sorted = [...smoothed].sort(
       (a, b) => Number(a.time) - Number(b.time)
     );
+    const deltas = this.calculateDeltas(sorted);
 
-    // Check for rest first (most stable pattern)
-    if (this.detectRest(sortedReadings, restMaxChange)) {
+
+    if (this.detectRest(sorted, restMaxChange)) {
       return 'rest';
     }
 
-    // Calculate deltas for pattern analysis
-    const deltas = this.calculateDeltas(sortedReadings);
+    if (this.detectFall(deltas, fallDrop, noiseThresh)) {
+      return 'fall';
+    }
 
-    // Check for fall and retreat patterns
-    const isFall = this.detectFall(deltas, fallDrop, noiseThresh);
-    const isRetreat = this.detectRetreat(deltas, noiseThresh);
+    if (this.detectPitchChange(sorted, pitchAltThresh, pitchRestThresh)) {
+      return 'pitch-changed';
+    }
 
-    // Return single classification (prefer fall over retreat if both detected)
-    if (isFall && !isRetreat) return 'fall';
-    if (isRetreat && !isFall) return 'retreat';
-
-    if (isFall && isRetreat) {
-      // Both patterns detected - use total change to decide
-      const totalChange =
-        sortedReadings[sortedReadings.length - 1].altitude -
-        sortedReadings[0].altitude;
-      const maxDrop = Math.min(...deltas);
-
-      // If there's a very significant single drop, it's likely a fall
-      return Math.abs(maxDrop) > fallDrop * 1.5 ? 'fall' : 'retreat';
+    if (this.detectRetreat(deltas, noiseThresh)) {
+      return 'retreat';
     }
 
     return null;
