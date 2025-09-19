@@ -76,7 +76,7 @@ export class DatabaseService {
         time TEXT NOT NULL,
         altitude REAL,
         type TEXT NOT NULL CHECK(type IN (
-          'session-started','session-ended','fall','fall-arrested',
+          'session-started','session-ended','fall',
           'pitch-changed','rest','retreat','manual-note',
           'lead-started','lead-ended','second-started','second-ended',
           'error','belay','barometer-reading'

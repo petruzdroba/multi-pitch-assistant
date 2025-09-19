@@ -2,7 +2,12 @@ import { Injectable } from '@angular/core';
 import { ClimbEvent } from '../models/climb-event.interface';
 import { AltitudeReading } from '../models/altitude-reading.interface';
 
-export type ClassifiedType = 'fall' | 'retreat' | 'rest' | null;
+export type ClassifiedType =
+  | 'fall'
+  | 'retreat'
+  | 'rest'
+  | 'pitch-changed'
+  | null;
 
 export interface ClassificationOptions {
   /** Minimum drop in one reading to be considered a fall (meters). */
@@ -11,24 +16,75 @@ export interface ClassificationOptions {
   allowedNoiseThreshold?: number;
   /** Maximum altitude change to be considered a rest (meters). */
   restMaxChangeThreshold?: number;
+  /** Number of readings to use for classification. */
+  readingsCount?: number;
+
+  pitchChangeAltitudeThreshold?: number;
+  /** Minimum rest time after climb to confirm pitch change (seconds). */
+  pitchChangeRestTimeThreshold?: number;
 }
 
 @Injectable({ providedIn: 'root' })
 export class EventClassificationService {
-  private readonly DEFAULT_NOISE_THRESHOLD = 0.5;
-  private readonly DEFAULT_FALL_DROP = 0.5;
-  private readonly READINGS_COUNT = 5;
-  private readonly DEFAULT_REST_MAX_CHANGE = 0.3; // 5cm max difference for rest
+  private readonly DEFAULT_NOISE_THRESHOLD = 0.4;
+  private readonly DEFAULT_FALL_DROP = 0.4;
+  private readonly DEFAULT_READINGS_COUNT = 8; // Increased from 5
+  private readonly DEFAULT_REST_MAX_CHANGE = 0.25;
+  private readonly DEFAULT_PITCH_ALTITUDE_THRESHOLD = 8; // meters
+  private readonly DEFAULT_PITCH_REST_TIME_THRESHOLD = 10; // seconds
+
+  private smoothReadings(readings: AltitudeReading[]): AltitudeReading[] {
+    if (readings.length < 3) return readings;
+
+    const smoothed = [readings[0]]; // Keep first reading as-is
+
+    for (let i = 1; i < readings.length - 1; i++) {
+      const avg =
+        (readings[i - 1].altitude +
+          readings[i].altitude +
+          readings[i + 1].altitude) /
+        3;
+      smoothed.push({
+        ...readings[i],
+        altitude: avg,
+      });
+    }
+
+    smoothed.push(readings[readings.length - 1]); // Keep last reading as-is
+    return smoothed;
+  }
+
+  private calculateDeltas(readings: AltitudeReading[]): number[] {
+    const deltas: number[] = [];
+    for (let i = 1; i < readings.length; i++) {
+      deltas.push(readings[i].altitude - readings[i - 1].altitude);
+    }
+    return deltas;
+  }
 
   private detectRest(
     readings: AltitudeReading[],
     restMaxChange: number
   ): boolean {
-    // For rest, all readings should be very close to first reading
-    const firstAlt = readings[0].altitude;
-    return readings.every(
-      (r) => Math.abs(r.altitude - firstAlt) <= restMaxChange
-    );
+    // Check time span - rest should happen within reasonable time
+    const timeSpan =
+      Number(readings[readings.length - 1].time) - Number(readings[0].time);
+    if (timeSpan > 8000) {
+      // More than 8 seconds is too long for rest
+      return false;
+    }
+
+    // Calculate standard deviation to measure stability
+    const altitudes = readings.map((r) => r.altitude);
+    const mean =
+      altitudes.reduce((sum, alt) => sum + alt, 0) / altitudes.length;
+    const variance =
+      altitudes.reduce((sum, alt) => sum + Math.pow(alt - mean, 2), 0) /
+      altitudes.length;
+    const stdDev = Math.sqrt(variance);
+
+    // For rest, standard deviation should be very low
+    return stdDev <= restMaxChange;
   }
 
   private detectFall(
@@ -36,41 +92,90 @@ export class EventClassificationService {
     fallDrop: number,
     noiseThresh: number
   ): boolean {
-    const firstClimb = deltas[0] > noiseThresh;
-    const dropIndex = deltas.findIndex((d, i) => i > 0 && d <= -fallDrop);
+    if (deltas.length < 4) return false;
 
-    if (!firstClimb || dropIndex === -1) return false;
+    // Require some initial climb (first half of readings) above a minimal threshold
+    const firstHalf = Math.floor(deltas.length / 2);
+    const climbPhase = deltas.slice(0, firstHalf);
+    const hasClimb = climbPhase.some((d) => d > noiseThresh / 2); // permissive: half of noiseThresh
+    if (!hasClimb) return false;
 
-    const afterDrop = deltas.slice(dropIndex + 1);
-    return afterDrop.every((d) => d > -fallDrop);
+    // Look for any significant drop beyond noise threshold
+    const dropIndex = deltas.findIndex(
+      (d) => d <= -fallDrop && d <= -noiseThresh
+    );
+    if (dropIndex === -1) return false;
+
+    // No recovery requirement — falling means you stay down
+    return true;
   }
 
   private detectRetreat(deltas: number[], noiseThresh: number): boolean {
-    // First three deltas must show decline
-    const firstThreeDeltas = deltas.slice(0, 3);
-    const finalDeltas = deltas.slice(3);
+    if (deltas.length < 4) return false;
 
-    // Check for consistent decline in first three deltas
-    const consistentDecline = firstThreeDeltas.every((d) => d < 0);
+    // Split into decline and stabilization phases
+    const declineCount = Math.ceil(deltas.length * 0.6); // First 60% should decline
+    const declinePhase = deltas.slice(0, declineCount);
+    const stabilizationPhase = deltas.slice(declineCount);
 
-    // Last deltas should be flat (within noise threshold)
-    const endsFlat = finalDeltas.every((d) => Math.abs(d) <= noiseThresh);
+    // Check for consistent decline (most readings should be negative)
+    const negativeCount = declinePhase.filter(
+      (d) => d < -noiseThresh / 2
+    ).length;
+    const declineRatio = negativeCount / declinePhase.length;
 
-    return consistentDecline && endsFlat;
+    if (declineRatio < 0.6) return false; // At least 60% should be declining
+
+    // Check for stabilization (small changes)
+    const stableCount = stabilizationPhase.filter(
+      (d) => Math.abs(d) <= noiseThresh
+    ).length;
+    const stabilizationRatio =
+      stabilizationPhase.length > 0
+        ? stableCount / stabilizationPhase.length
+        : 1;
+
+    return stabilizationRatio >= 0.7; // At least 70% should be stable
   }
 
-  /**
-   * Classify five altitude readings into 'fall', 'retreat', or 'rest'.
-   * Options allow customizing thresholds:
-   * - fallDropThreshold: override min single-step drop for a fall
-   * - allowedNoiseThreshold: override min change considered as event
-   * - restMaxChangeThreshold: override max change for rest
-   */
+  private detectPitchChange(
+    readings: AltitudeReading[],
+    altitudeThreshold: number,
+    restTimeThreshold: number
+  ): boolean {
+    if (readings.length < 6) return false;
+
+    const totalGain =
+      readings[readings.length - 1].altitude - readings[0].altitude;
+    if (totalGain < altitudeThreshold) return false;
+
+    const midPoint = Math.floor(readings.length * 0.6);
+    const climbPhase = readings.slice(0, midPoint);
+    const restPhase = readings.slice(midPoint);
+
+    const climbGain =
+      climbPhase[climbPhase.length - 1].altitude - climbPhase[0].altitude;
+    if (climbGain / totalGain < 0.7) return false;
+
+    if (restPhase.length < 3) return false;
+    const restAltitudes = restPhase.map((r) => r.altitude);
+    const restVariation =
+      Math.max(...restAltitudes) - Math.min(...restAltitudes);
+    if (restVariation > 1.5) return false;
+
+    const restDuration =
+      Number(restPhase[restPhase.length - 1].time) - Number(restPhase[0].time);
+    if (restDuration / 1000 < restTimeThreshold) return false;
+
+    return true;
+  }
+
   classify(
     readings: AltitudeReading[],
     options: ClassificationOptions = {}
   ): ClassifiedType {
-    if (!readings || readings.length !== this.READINGS_COUNT) {
+    const expectedCount = options.readingsCount ?? this.DEFAULT_READINGS_COUNT;
+    if (!readings || readings.length !== expectedCount) {
       return null;
     }
 
@@ -79,39 +184,39 @@ export class EventClassificationService {
       options.allowedNoiseThreshold ?? this.DEFAULT_NOISE_THRESHOLD;
     const restMaxChange =
       options.restMaxChangeThreshold ?? this.DEFAULT_REST_MAX_CHANGE;
+    const pitchAltThresh =
+      options.pitchChangeAltitudeThreshold ??
+      this.DEFAULT_PITCH_ALTITUDE_THRESHOLD;
+    const pitchRestThresh =
+      options.pitchChangeRestTimeThreshold ??
+      this.DEFAULT_PITCH_REST_TIME_THRESHOLD;
 
-    // Check rest first and ensure all readings are within 1 second of each other
-    if (this.detectRest(readings, restMaxChange)) {
-      const timeSpan =
-        Number(readings[readings.length - 1].time) - Number(readings[0].time);
-      if (timeSpan <= 5000) {
-        // 5 seconds in milliseconds
-        return 'rest';
-      }
+    const smoothed = this.smoothReadings(readings);
+    const sorted = [...smoothed].sort(
+      (a, b) => Number(a.time) - Number(b.time)
+    );
+    const deltas = this.calculateDeltas(sorted);
+
+
+    if (this.detectRest(sorted, restMaxChange)) {
+      return 'rest';
     }
 
-    const deltas = readings
-      .slice(1)
-      .map((r, i) => r.altitude - readings[i].altitude);
+    if (this.detectFall(deltas, fallDrop, noiseThresh)) {
+      return 'fall';
+    }
 
-    const isFall = this.detectFall(deltas, fallDrop, noiseThresh);
-    const isRetreat = this.detectRetreat(deltas, noiseThresh);
+    if (this.detectPitchChange(sorted, pitchAltThresh, pitchRestThresh)) {
+      return 'pitch-changed';
+    }
 
-    if (isFall && !isRetreat) return 'fall';
-    if (isRetreat && !isFall) return 'retreat';
-    if (isRetreat && isFall) {
-      // If both patterns match, prefer retreat if the drops are smaller
-      const maxDrop = Math.min(...deltas);
-      return Math.abs(maxDrop) <= fallDrop ? 'retreat' : 'fall';
+    if (this.detectRetreat(deltas, noiseThresh)) {
+      return 'retreat';
     }
 
     return null;
   }
 
-  /**
-   * From five readings, produce a ClimbEvent if classification matches.
-   * Pass options to customize thresholds.
-   */
   createEventFromReadings(
     readings: AltitudeReading[],
     options: ClassificationOptions = {}
@@ -119,12 +224,50 @@ export class EventClassificationService {
     const type = this.classify(readings, options);
     if (!type) return null;
 
-    const last = readings[readings.length - 1];
+    const sortedReadings = [...readings].sort(
+      (a, b) => Number(a.time) - Number(b.time)
+    );
+    const last = sortedReadings[sortedReadings.length - 1];
+
     return {
       id: crypto.randomUUID(),
       time: last.time,
       altitude: last.altitude,
       type,
     };
+  }
+
+  getDefaultReadingsCount(): number {
+    return this.DEFAULT_READINGS_COUNT;
+  }
+
+  getRecommendedOptions(
+    scenario: 'sensitive' | 'balanced' | 'conservative'
+  ): ClassificationOptions {
+    switch (scenario) {
+      case 'sensitive':
+        return {
+          readingsCount: 8,
+          fallDropThreshold: 0.3,
+          allowedNoiseThreshold: 0.3,
+          restMaxChangeThreshold: 0.2,
+        };
+      case 'balanced':
+        return {
+          readingsCount: 8,
+          fallDropThreshold: 0.4,
+          allowedNoiseThreshold: 0.4,
+          restMaxChangeThreshold: 0.25,
+        };
+      case 'conservative':
+        return {
+          readingsCount: 10,
+          fallDropThreshold: 0.6,
+          allowedNoiseThreshold: 0.5,
+          restMaxChangeThreshold: 0.3,
+        };
+      default:
+        return {};
+    }
   }
 }

@@ -12,8 +12,8 @@ export class AltitudeRecorderService {
   private lastEmissionTime = 0;
   private baselinePressure: number | null = null;
 
-  private THROTTLE_INTERVAL_MS = 1000; // 1 second throttle
-  private MIN_ALTITUDE_CHANGE = 0.29; // minimum meters change to emit
+  private THROTTLE_INTERVAL_MS = 750;
+  private MIN_ALTITUDE_CHANGE = 0.25;
 
   get lastAltitude(): number | null {
     return this.altitudeSubject.getValue();
@@ -56,25 +56,30 @@ export class AltitudeRecorderService {
               const now = Date.now();
               const timeSinceLast = now - this.lastEmissionTime;
 
-              // Always emit after 1 second, regardless of change
+              // Emit based on time interval or significant change
+              let shouldEmit = false;
+              let emissionReason = '';
+
+              // Always emit after throttle interval
               if (timeSinceLast >= this.THROTTLE_INTERVAL_MS) {
-                this.lastEmittedAltitude = altitude;
-                this.lastEmissionTime = now;
-                this.altitudeSubject.next(altitude);
-                console.debug(
-                  `[Barometer] Time-based emission: ${altitude.toFixed(2)} m`
-                );
+                shouldEmit = true;
+                emissionReason = 'time-based';
               }
-              // Also emit immediately on significant changes, even if less than 1 second
+              // Also emit immediately on significant changes
               else if (
-                Math.abs(altitude - (this.lastEmittedAltitude ?? 0)) >=
-                this.MIN_ALTITUDE_CHANGE
+                this.lastEmittedAltitude !== null &&
+                Math.abs(altitude - this.lastEmittedAltitude) >= this.MIN_ALTITUDE_CHANGE
               ) {
+                shouldEmit = true;
+                emissionReason = 'change-based';
+              }
+
+              if (shouldEmit) {
                 this.lastEmittedAltitude = altitude;
                 this.lastEmissionTime = now;
                 this.altitudeSubject.next(altitude);
                 console.debug(
-                  `[Barometer] Change-based emission: ${altitude.toFixed(2)} m`
+                  `[Barometer] ${emissionReason} emission: ${altitude.toFixed(2)} m`
                 );
               }
             }
@@ -83,6 +88,7 @@ export class AltitudeRecorderService {
       }
 
       await Barometer.start();
+      console.log('[AltitudeRecorderService] Recording started with optimized settings');
     } catch (err) {
       console.error(
         '[AltitudeRecorderService] Error starting barometer recording:',
@@ -94,6 +100,7 @@ export class AltitudeRecorderService {
   async stopRecording(): Promise<void> {
     try {
       await Barometer.stop();
+      console.log('[AltitudeRecorderService] Recording stopped');
     } catch (err) {
       console.error('[AltitudeRecorderService] Error stopping barometer:', err);
     }
@@ -106,7 +113,7 @@ export class AltitudeRecorderService {
     this.altitudeSubject.next(null);
     this.lastEmittedAltitude = null;
     this.lastEmissionTime = 0;
-    this.baselinePressure = null; // <-- reset baseline when stopping
+    this.baselinePressure = null;
   }
 
   // Calculate altitude difference relative to baseline pressure

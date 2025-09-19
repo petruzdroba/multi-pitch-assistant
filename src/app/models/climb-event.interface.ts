@@ -6,7 +6,6 @@ export interface ClimbEvent {
     | 'session-started'
     | 'session-ended'
     | 'fall'
-    | 'fall-arrested'
     | 'pitch-changed'
     | 'rest'
     | 'retreat'

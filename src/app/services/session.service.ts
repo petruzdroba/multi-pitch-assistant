@@ -6,7 +6,7 @@ import { Geolocation } from '@capacitor/geolocation';
 import { AltitudeRecorderService } from './altitude-recorder.service';
 import { Subscription } from 'rxjs';
 import { AltitudeReading } from '../models/altitude-reading.interface';
-import { EventClassificationService } from './event-classification.service';
+import { EventClassificationService, ClassificationOptions } from './event-classification.service';
 
 @Injectable({ providedIn: 'root' })
 export class SessionService {
@@ -24,9 +24,31 @@ export class SessionService {
   private altitudeSub: Subscription | null = null;
   private lastAltitude: number | null = null;
 
+  // Configuration for event classification
+  private classificationOptions: ClassificationOptions = {};
+  private requiredReadingsCount: number = 8;
+
+  constructor() {
+    // Set up classification options on initialization
+    this.setClassificationMode('balanced');
+  }
+
+
+  setClassificationMode(mode: 'sensitive' | 'balanced' | 'conservative'): void {
+    this.classificationOptions = this.classifierService.getRecommendedOptions(mode);
+    this.requiredReadingsCount = this.classificationOptions.readingsCount || 8;
+    console.log(`[SessionService] Classification mode set to ${mode}, using ${this.requiredReadingsCount} readings`);
+  }
+
+
+  setCustomClassificationOptions(options: ClassificationOptions): void {
+    this.classificationOptions = options;
+    this.requiredReadingsCount = options.readingsCount || 8;
+    console.log(`[SessionService] Custom classification options set`, options);
+  }
+
   async startSession(): Promise<void> {
-    let location: { latitude: number; longitude: number } | undefined =
-      undefined;
+    let location: { latitude: number; longitude: number } | undefined = undefined;
 
     try {
       const permission = await Geolocation.requestPermissions();
@@ -61,7 +83,12 @@ export class SessionService {
 
     this.session.set(newSession);
     this.recording.set(true);
+
+    // Clear any existing readings
+    this.altitudeReadings.set([]);
+
     await this.startAltitudeRecording();
+    console.log(`[SessionService] Session started with adaptive classification (starts with 8 readings, auto-adjusts based on activity)`);
   }
 
   recordEvent = (event: ClimbEvent): void => {
@@ -80,7 +107,7 @@ export class SessionService {
     }
 
     if (event.altitude === undefined || event.altitude === null) {
-      const lastAltitude = this.altService.lastAltitude; // <- get the number
+      const lastAltitude = this.altService.lastAltitude;
       if (lastAltitude !== null && lastAltitude !== undefined) {
         event.altitude = lastAltitude;
       } else {
@@ -97,9 +124,9 @@ export class SessionService {
         events: [...session.events, event],
       };
     });
-  };
 
-  //recorder function, that will have an interval that will record altitude and time, and maybe after it will clasify events and add them
+    console.log(`[SessionService] Event recorded:`, event);
+  };
 
   endSession(): void {
     console.log('SessionService: endSession called');
@@ -123,6 +150,7 @@ export class SessionService {
     this.recording.set(false);
     this.logService.addSession(this.session());
     this.session.set({} as Session);
+    this.altitudeReadings.set([]);
     this.stopAltitudeRecording();
   }
 
@@ -133,12 +161,16 @@ export class SessionService {
       if (alt !== null) {
         this.lastAltitude = alt;
 
-        this.altitudeReadings.update((readings) => [
-          ...readings,
-          { time: new Date(), altitude: alt },
-        ]);
+        // Add new reading with timestamp
+        const newReading: AltitudeReading = {
+          time: new Date(),
+          altitude: alt
+        };
 
-        if (this.altitudeReadings().length >= 5) {
+        this.altitudeReadings.update((readings) => [...readings, newReading]);
+
+        // Check if we have enough readings for classification
+        if (this.altitudeReadings().length >= this.requiredReadingsCount) {
           this.classifyAltitudeEvents(this.altitudeReadings());
         }
       }
@@ -146,25 +178,44 @@ export class SessionService {
   }
 
   private stopAltitudeRecording(): void {
-    // unsubscribe from the stream
     this.altitudeSub?.unsubscribe();
     this.altitudeSub = null;
-
     this.altService.stopRecording();
   }
 
-  private classifyAltitudeEvents(reads: AltitudeReading[]): void {
-    // Keep only the last 3 readings
-    const window = reads.slice(-5);
-    const event = this.classifierService.createEventFromReadings(window);
+  private classifyAltitudeEvents(readings: AltitudeReading[]): void {
+    // Use the exact number of readings required for classification
+    const window = readings.slice(-this.requiredReadingsCount);
+
+    console.log(`[SessionService] Attempting classification with ${window.length} readings`);
+
+    const event = this.classifierService.createEventFromReadings(window, this.classificationOptions);
 
     if (event) {
-      // Record detected event and clear all buffered readings
+      // Event detected - record it and clear buffer to avoid duplicates
+      console.log(`[SessionService] Event detected and recorded:`, event);
       this.recordEvent(event);
       this.altitudeReadings.set([]);
     } else {
-      // No event: slide window by dropping oldest, keep the last two
-      this.altitudeReadings.set(window.slice(1));
+      // No event detected - slide the window by removing older readings
+      // Keep more readings in buffer to maintain overlapping windows
+      const keepCount = Math.max(1, this.requiredReadingsCount - 2);
+      this.altitudeReadings.set(readings.slice(-keepCount));
     }
+  }
+
+
+  getCurrentReadingsCount(): number {
+    return this.altitudeReadings().length;
+  }
+
+
+  getCurrentClassificationOptions(): ClassificationOptions {
+    return { ...this.classificationOptions };
+  }
+
+
+  getCurrentReadings(): AltitudeReading[] {
+    return [...this.altitudeReadings()];
   }
 }
