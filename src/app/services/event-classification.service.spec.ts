@@ -105,4 +105,54 @@ describe('EventClassificationService (strict-match tests)', () => {
     const result = (service as any).detectRetreat(deltas, 0.4);
     expect(result).toBeFalse();
   });
+
+  // --- detectPitchChange tests ---
+  it('detectPitchChange returns true for significant climb followed by stable rest', () => {
+  const readings: AltitudeReading[] = [
+    { altitude: 0, time: new Date(2024,0,1,12,0,0) },
+    { altitude: 2, time: new Date(2024,0,1,12,0,2) },
+    { altitude: 5, time: new Date(2024,0,1,12,0,4) },
+    { altitude: 7, time: new Date(2024,0,1,12,0,6) },
+    { altitude: 8, time: new Date(2024,0,1,12,0,8) },
+    { altitude: 8.1, time: new Date(2024,0,1,12,0,12) },
+    { altitude: 8.0, time: new Date(2024,0,1,12,0,16) },
+    { altitude: 8.0, time: new Date(2024,0,1,12,0,20) },
+    { altitude: 8.0, time: new Date(2024,0,1,12,0,24) },
+  ];
+  const result = (service as any).detectPitchChange(readings, 8, 10);
+  expect(result).toBeTrue();
+});
+
+
+  it('detectPitchChange returns false if total gain is below threshold', () => {
+    const readings: AltitudeReading[] = [0, 1, 2, 2.5, 2.8, 2.8, 2.8].map(
+      (alt, i) => ({ altitude: alt, time: new Date(2024, 0, 1, 12, 0, i) })
+    );
+    const result = (service as any).detectPitchChange(readings, 8, 10);
+    expect(result).toBeFalse();
+  });
+
+  it('detectPitchChange returns false if climb not in first 60%', () => {
+    const readings: AltitudeReading[] = [0, 1, 2, 3, 5, 6, 8, 8, 8].map(
+      (alt, i) => ({ altitude: alt, time: new Date(2024, 0, 1, 12, 0, i) })
+    );
+    const result = (service as any).detectPitchChange(readings, 8, 10);
+    expect(result).toBeFalse();
+  });
+
+  it('detectPitchChange returns false if rest phase is too short', () => {
+    const readings: AltitudeReading[] = [0, 2, 4, 6, 8, 8.1, 8.0].map(
+      (alt, i) => ({ altitude: alt, time: new Date(2024, 0, 1, 12, 0, i) })
+    );
+    const result = (service as any).detectPitchChange(readings, 8, 10);
+    expect(result).toBeFalse();
+  });
+
+  it('detectPitchChange returns false if rest phase is too unstable', () => {
+    const readings: AltitudeReading[] = [0, 2, 4, 6, 8, 8.0, 9.0, 7.5, 8.5].map(
+      (alt, i) => ({ altitude: alt, time: new Date(2024, 0, 1, 12, 0, i) })
+    );
+    const result = (service as any).detectPitchChange(readings, 8, 10);
+    expect(result).toBeFalse();
+  });
 });
