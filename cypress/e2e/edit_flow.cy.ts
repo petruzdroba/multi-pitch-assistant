@@ -47,7 +47,7 @@ describe('Edit Flow', () => {
     );
   });
 
-  it('should add events on demand', () => {
+  it('should add event on demand', () => {
     cy.visit('/');
     cy.contains('Start Climbing').click();
     cy.contains('End Climbing').click();
@@ -95,7 +95,7 @@ describe('Edit Flow', () => {
     );
   });
 
-  it('should perform a complete session workflow', () => {
+  it('should perform a name change and multiple event adding', () => {
     cy.visit('/');
     cy.contains('Start Climbing').click();
     cy.contains('End Climbing').click();
@@ -158,5 +158,55 @@ describe('Edit Flow', () => {
     cy.get('.session-cards ion-card-title').should('contain', 'No sessions recorded yet');
   });
 
+  it('should edit an added event', () => {
+     cy.visit('/');
+    cy.contains('Start Climbing').click();
 
+    cy.get('ion-fab-button').click();
+
+    cy.get('ion-alert').should('be.visible');
+    cy.get('ion-alert input.alert-input').type('Test manual note');
+    cy.get(
+      'ion-alert button.alert-button:not(.alert-button-role-cancel)'
+    ).click();
+
+    cy.contains('End Climbing').click();
+
+    cy.url().should('include', '/tabs/home');
+
+    cy.get('ion-tab-button').contains('Log').click();
+    cy.get('.session-cards ion-card').should('exist');
+    cy.get('.session-cards ion-card-title').should('contain', 'Climb on').click();
+
+    // Swipe to reveal edit button (using touch events)
+    cy.get('ion-item-sliding').first()
+      .trigger('touchstart', { touches: [{ clientX: 300, clientY: 100 }] })
+      .trigger('touchmove', { touches: [{ clientX: 200, clientY: 100 }] })
+      .trigger('touchend');
+
+    // Click edit button (force because item-options are hidden by default)
+    cy.get('ion-item-option.glass-swipe.medium').click({ force: true });
+
+    // Edit the event
+    cy.get('ion-select').click();
+    cy.get('ion-alert').should('be.visible');
+    cy.get('.alert-radio-group .alert-radio-button').contains('rest').click();
+    cy.get('ion-alert .alert-button').contains('OK').click();
+
+    cy.get('ion-input[type="number"]').type('1500');
+    cy.get('ion-textarea').clear().type('Updated note text');
+
+    // Save changes
+    cy.contains('ion-button', 'Confirm').click();
+
+    // Verify changes
+    cy.get('.event-list .event-item .event-type').should('contain', 'rest');
+    cy.get('.event-list .event-item .event-altitude').should('contain', '1,500.00 m');
+
+    cy.get('ion-fab-button[color="danger"]').click();
+    cy.get('.session-cards ion-card').first().trigger('mousedown').wait(1000);
+    cy.get('ion-alert').should('be.visible');
+    cy.get('ion-alert .alert-button-role-destructive').contains('Delete').click();
+    cy.get('.session-cards ion-card-title').should('contain', 'No sessions recorded yet');
+  });
 });
