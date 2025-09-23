@@ -209,4 +209,45 @@ describe('Edit Flow', () => {
     cy.get('ion-alert .alert-button-role-destructive').contains('Delete').click();
     cy.get('.session-cards ion-card-title').should('contain', 'No sessions recorded yet');
   });
+
+  it('should delete an added event', () => {
+    cy.visit('/');
+    cy.contains('Start Climbing').click();
+
+    // Add an event to delete later
+    cy.get('ion-fab-button').click();
+    cy.get('ion-alert').should('be.visible');
+    cy.get('ion-alert input.alert-input').type('Event to delete');
+    cy.get('ion-alert button.alert-button:not(.alert-button-role-cancel)').click();
+
+    cy.contains('End Climbing').click();
+
+    // Navigate to session
+    cy.url().should('include', '/tabs/home');
+    cy.get('ion-tab-button').contains('Log').click();
+    cy.get('.session-cards ion-card').should('exist');
+    cy.get('.session-cards ion-card-title').should('contain', 'Climb on').click();
+
+    // Verify event exists before deletion
+    cy.get('.event-list .event-item .event-type').should('contain', 'manual-note');
+
+    // Swipe to reveal delete button (using touch events)
+    cy.get('ion-item-sliding').first()
+      .trigger('touchstart', { touches: [{ clientX: 200, clientY: 100 }] })
+      .trigger('touchmove', { touches: [{ clientX: 300, clientY: 100 }] })
+      .trigger('touchend');
+
+    // Click delete button (force because item-options are hidden by default)
+    cy.get('ion-item-option.glass-swipe.danger').click({ force: true });
+
+    // Verify event is deleted (should only see start and end events)
+    cy.get('.event-list .event-item .event-type').should('not.contain', 'manual-note');
+
+    // Clean up - delete session
+    cy.get('ion-fab-button[color="danger"]').click();
+    cy.get('.session-cards ion-card').first().trigger('mousedown').wait(1000);
+    cy.get('ion-alert').should('be.visible');
+    cy.get('ion-alert .alert-button-role-destructive').contains('Delete').click();
+    cy.get('.session-cards ion-card-title').should('contain', 'No sessions recorded yet');
+  });
 });
