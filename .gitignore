@@ -116,3 +116,5 @@ yarn-error.log*
 # Misc
 *.swp
 *~
+
+*.jks
