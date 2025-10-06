@@ -37,18 +37,21 @@ export class AuthService {
   }
 
   checkRememberedUser(): void {
-    Storage.get({ key: 'accessToken' }).then(({ value: token }) => {
-      if (token) {
-        this.http
-          .get<UserData>(`${environment.serverUrl}/auth/me/`, {
-            headers: { Authorization: `Bearer ${token}` },
-          })
-          .pipe(take(1))
-          .subscribe({
-            next: (user) => this.userData.set(user),
-            error: () => this.logOut(),
-          });
-      }
-    });
-  }
+  Storage.get({ key: 'accessToken' }).then(({ value: token }) => {
+    if (token) {
+      this.http
+        .get<{ user: UserData; accessToken: string }>(`${environment.serverUrl}/auth/me/`, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        .pipe(take(1))
+        .subscribe({
+          next: async (res) => {
+            this.userData.set(res.user);
+            await Storage.set({ key: 'accessToken', value: res.accessToken });
+          },
+          error: () => this.logOut(),
+        });
+    }
+  });
+}
 }
