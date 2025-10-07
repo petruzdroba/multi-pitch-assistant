@@ -6,6 +6,8 @@ import { AppComponent } from './app/app.component';
 
 import { addIcons } from 'ionicons';
 import * as allIcons from 'ionicons/icons';
+import { authInterceptor } from './app/interceptors/auth.interceptor';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 
 addIcons({ ...allIcons });
 
@@ -14,5 +16,6 @@ bootstrapApplication(AppComponent, {
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
     provideIonicAngular(),
     provideRouter(routes, withPreloading(PreloadAllModules)),
+    provideHttpClient(withInterceptors([authInterceptor])),
   ],
 });
