@@ -46,6 +46,8 @@ export class AppComponent implements OnInit, OnDestroy {
         this.renderer.removeClass(appElement, 'bg-home');
         this.renderer.removeClass(appElement, 'bg-log');
         this.renderer.removeClass(appElement, 'bg-session');
+        this.renderer.removeClass(appElement, 'bg-user');
+
 
         // Add new bg class
         if (event.url.includes('/tabs/home')) {
@@ -57,6 +59,8 @@ export class AppComponent implements OnInit, OnDestroy {
           this.renderer.addClass(appElement, 'bg-log');
         } else if (event.url.includes('/tabs/session')) {
           this.renderer.addClass(appElement, 'bg-session');
+        } else if (event.url.includes('/tabs/user')) {
+          this.renderer.addClass(appElement, 'bg-user');
         } else {
           this.renderer.addClass(appElement, 'bg-home');
           // fallback

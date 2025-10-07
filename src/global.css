@@ -67,6 +67,14 @@ ion-app.bg-log {
   background-attachment: fixed;
 }
 
+ion-app.bg-user{
+  background-image: url('/assets/images/pink.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
 ion-app {
   transition: background-image 0.3s ease-in-out, filter 0.4s ease-in-out;
 }
