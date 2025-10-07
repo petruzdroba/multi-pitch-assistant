@@ -12,6 +12,7 @@ export class AuthService {
 
   public readonly user = computed(() => this.userData());
   public readonly isLoggedIn = computed(() => this.userData() !== null);
+  // public readonly showLoginReminder = computed(() => this.userData());
 
   logIn(data: { email: string; password: string }): Observable<UserData> {
     return this.http
@@ -24,6 +25,7 @@ export class AuthService {
         tap(async (res) => {
           await Storage.set({ key: 'accessToken', value: res.access });
           await Storage.set({ key: 'refreshToken', value: res.refresh });
+          await Storage.set({ key: 'cachedUser', value: JSON.stringify(res.user) });
           this.userData.set(res.user);
         }),
         map((res) => res.user)
@@ -37,21 +39,36 @@ export class AuthService {
   }
 
   checkRememberedUser(): void {
-  Storage.get({ key: 'accessToken' }).then(({ value: token }) => {
-    if (token) {
-      this.http
-        .get<{ user: UserData; accessToken: string }>(`${environment.serverUrl}/auth/me/`, {
-          headers: { Authorization: `Bearer ${token}` },
-        })
-        .pipe(take(1))
-        .subscribe({
-          next: async (res) => {
-            this.userData.set(res.user);
-            await Storage.set({ key: 'accessToken', value: res.accessToken });
-          },
-          error: () => this.logOut(),
-        });
-    }
-  });
-}
+    Storage.get({ key: 'accessToken' }).then(({ value: token }) => {
+      if (token) {
+        this.http
+          .get<{ user: UserData; accessToken: string }>(
+            `${environment.serverUrl}/auth/me/`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          )
+          .pipe(take(1))
+          .subscribe({
+            next: async (res) => {
+              this.userData.set(res.user);
+              await Storage.set({ key: 'accessToken', value: res.accessToken });
+            },
+            error: async (err) => {
+              if (err.status === 401) await this.logOut();
+              else if (err.status === 0) {
+                //No internet connection
+                console.warn('[AuthService] Offline, keeping cached user');
+                const storedUser = await Storage.get({ key: 'cachedUser' });
+                if (storedUser.value) {
+                  this.userData.set(JSON.parse(storedUser.value));
+                }
+              }
+            },
+          });
+      }
+    });
+  }
+
+
 }
