@@ -73,3 +73,32 @@
   justify-content: flex-start;
 }
 
+.glass-form ion-item.invalid {
+  --background: rgba(255, 0, 0, 0.12);
+  --border-color: rgba(255, 0, 0, 0.35);
+  --box-shadow: 0 4px 12px rgba(255, 0, 0, 0.25);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border-radius: 12px;
+  transition: all 0.25s ease;
+}
+
+.glass-form ion-item.invalid:hover {
+  --background: rgba(255, 0, 0, 0.25);
+  --border-color: rgba(255, 0, 0, 0.6);
+  --box-shadow: 0 6px 16px rgba(255, 0, 0, 0.45);
+  transform: translateY(-2px);
+}
+
+.glass-form ion-item.invalid:active {
+  transform: scale(0.96);
+  --box-shadow: 0 3px 8px rgba(255, 0, 0, 0.25);
+}
+
+.glass-form ion-item.invalid ion-input,
+.glass-form ion-item.invalid ion-select,
+.glass-form ion-item.invalid ion-textarea {
+  color: #ffaaaa; /* softer red text for invalid input */
+}
+
+

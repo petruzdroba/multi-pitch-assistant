@@ -1,18 +1,26 @@
 <div class="main">
-  <form class="glass-form">
+  <form class="glass-form" [formGroup]="form" (ngSubmit)="onSubmit()">
     <div class="email">
-      <ion-item>
+      <ion-item
+        [class.invalid]="form.get('email')?.touched && form.get('email')?.invalid">
         <ion-input
           label="Email"
           type="email"
           placeholder="john.doe@example.com"
+          formControlName="email"
         ></ion-input>
       </ion-item>
     </div>
 
     <div class="password">
-      <ion-item>
-        <ion-input label="Password" type="password" [clearInput]="true"></ion-input>
+      <ion-item
+        [class.invalid]="form.get('password')?.touched && form.get('password')?.invalid">
+        <ion-input
+          label="Password"
+          type="password"
+          [clearInput]="true"
+          formControlName="password"
+        ></ion-input>
       </ion-item>
     </div>
 
