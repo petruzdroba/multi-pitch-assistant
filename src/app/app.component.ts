@@ -3,6 +3,7 @@ import { Component, inject, OnDestroy, OnInit, Renderer2 } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { DatabaseService } from './services/database.service';
+import { AuthService } from './services/auth.service';
 
 @Component({
   selector: 'app-root',
@@ -15,6 +16,7 @@ export class AppComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private renderer = inject(Renderer2);
   private db = inject(DatabaseService);
+  private auth = inject(AuthService)
   dbReady = false;
   error: string | null = null;
 
@@ -27,6 +29,8 @@ export class AppComponent implements OnInit, OnDestroy {
         err.message || 'An error occurred while initializing the database.';
       console.error(err);
     }
+
+    this.auth.checkRememberedUser();
 
     window.addEventListener('beforeunload', async () => {
       try {

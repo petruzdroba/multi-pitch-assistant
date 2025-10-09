@@ -61,7 +61,7 @@ export class AuthService {
       if (token) {
         this.http
           .get<{ user: UserData; accessToken: string }>(
-            `${environment.serverUrl}/auth/me/`,
+            `${environment.serverUrl}/me/`,
             {
               headers: { Authorization: `Bearer ${token}` },
             }
