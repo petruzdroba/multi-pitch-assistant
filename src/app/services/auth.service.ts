@@ -32,6 +32,24 @@ export class AuthService {
       );
   }
 
+  signUp(data: { username: string; email: string; password: string }): Observable<UserData> {
+    return this.http
+      .post<{ access: string; refresh: string; user: UserData }>(
+        `${environment.serverUrl}/signup/`,
+        data
+      )
+      .pipe(
+        take(1),
+        tap(async (res) => {
+          await Storage.set({ key: 'accessToken', value: res.access });
+          await Storage.set({ key: 'refreshToken', value: res.refresh });
+          await Storage.set({ key: 'cachedUser', value: JSON.stringify(res.user) });
+          this.userData.set(res.user);
+        }),
+        map((res) => res.user)
+      );
+  }
+
   async logOut(): Promise<void> {
     await Storage.remove({ key: 'accessToken' });
     await Storage.remove({ key: 'refreshToken' });
