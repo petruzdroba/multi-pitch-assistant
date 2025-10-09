@@ -1,0 +1,63 @@
+<div class="main">
+  <form class="glass-form" [formGroup]="form" (ngSubmit)="onSubmit()">
+    <div class="email">
+      <ion-item
+        [class.invalid]="form.get('email')?.touched && form.get('email')?.invalid">
+        <ion-input
+          label="Email"
+          type="email"
+          placeholder="john.doe@example.com"
+          formControlName="email"
+        ></ion-input>
+      </ion-item>
+    </div>
+
+    <div class="username">
+      <ion-item
+        [class.invalid]="form.get('username')?.touched && form.get('username')?.invalid">
+        <ion-input
+          label="Username"
+          type="username"
+          placeholder="johnnyDough"
+          formControlName="username"
+        ></ion-input>
+      </ion-item>
+    </div>
+
+    <div class="password">
+      <ion-item
+        [class.invalid]="form.get('password')?.touched && form.get('password')?.invalid">
+        <ion-input
+          label="Password"
+          type="password"
+          [clearInput]="true"
+          placeholder="********"
+          minlength="8"
+          maxlength="20"
+          [counter]="true"
+          formControlName="password"
+        ></ion-input>
+      </ion-item>
+    </div>
+
+    <div class="confirmPassword">
+      <ion-item
+        [class.invalid]="form.get('confirmPassword')?.touched && form.get('confirmPassword')?.invalid">
+        <ion-input
+          label="Confirm Password"
+          type="confirmPassword"
+          [clearInput]="true"
+          minlength="8"
+          maxlength="20"
+          [counter]="true"
+          placeholder="********"
+          formControlName="confirmPassword"
+        ></ion-input>
+      </ion-item>
+    </div>
+
+    <div class="submit">
+      <button class="btn-glass" role="button">Submit</button>
+    </div>
+  </form>
+</div>
