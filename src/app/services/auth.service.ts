@@ -60,7 +60,7 @@ export class AuthService {
     Storage.get({ key: 'accessToken' }).then(({ value: token }) => {
       if (token) {
         this.http
-          .get<{ user: UserData; accessToken: string }>(
+          .get<{ user: UserData; access: string }>(
             `${environment.serverUrl}/me/`,
             {
               headers: { Authorization: `Bearer ${token}` },
@@ -70,7 +70,7 @@ export class AuthService {
           .subscribe({
             next: async (res) => {
               this.userData.set(res.user);
-              await Storage.set({ key: 'accessToken', value: res.accessToken });
+              await Storage.set({ key: 'accessToken', value: res.access });
             },
             error: async (err) => {
               if (err.status === 401) await this.logOut();
