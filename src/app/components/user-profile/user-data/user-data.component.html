@@ -7,12 +7,17 @@
   <div class="user-info glass-form">
     <ion-item>
       <ion-label position="stacked">Email</ion-label>
-      <ion-input readonly value="{{userData().email}}"></ion-input>
+      <ion-input readonly value="{{ userData().email }}"></ion-input>
     </ion-item>
 
     <ion-item>
       <ion-label position="stacked">Username</ion-label>
-      <ion-input readonly value="{{userData().username}}"></ion-input>
+      <ion-input readonly value="{{ userData().username }}"></ion-input>
     </ion-item>
+  </div>
+
+  <div class="actions">
+    <button class="btn-glass" role="button" (click)="onLogout()">Log Out</button>
+    <button class="btn-glass" role="button">Button 2</button>
   </div>
 </div>
