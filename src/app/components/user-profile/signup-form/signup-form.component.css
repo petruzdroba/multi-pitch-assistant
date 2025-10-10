@@ -7,6 +7,26 @@
   justify-content: flex-start;
 }
 
+.greeting-header {
+  width: 100%;
+  padding: 0 16px 24px 26px;
+  text-align: left;
+}
+
+.greeting-title {
+  font-size: 1.8rem;
+  font-weight: bold;
+  margin: 0;
+  margin-bottom: 8px;
+}
+
+.greeting-subtext {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin: 0;
+  opacity: 0.8;
+}
+
 .glass-form {
   width: 90%;
   margin: 0 auto;
