@@ -3,12 +3,13 @@ import { AuthService } from 'src/app/services/auth.service';
 import { IonToolbar, IonSegment, IonSegmentButton, IonLabel, IonSegmentView, IonSegmentContent } from "@ionic/angular/standalone";
 import { LoginFormComponent } from "./login-form/login-form.component";
 import { SignupFormComponent } from "./signup-form/signup-form.component";
+import { UserDataComponent } from "./user-data/user-data.component";
 
 @Component({
   selector: 'app-user-profile',
   templateUrl: './user-profile.component.html',
   styleUrls: ['./user-profile.component.css'],
-  imports: [IonToolbar, IonSegment, IonSegmentButton, IonLabel, IonSegmentView, IonSegmentContent, LoginFormComponent, SignupFormComponent],
+  imports: [IonToolbar, IonSegment, IonSegmentButton, IonLabel, IonSegmentView, IonSegmentContent, LoginFormComponent, SignupFormComponent, UserDataComponent],
 })
 export class UserProfileComponent {
   private authService = inject(AuthService)
