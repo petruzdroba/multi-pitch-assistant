@@ -1,0 +1,76 @@
+.main {
+  width: 100%;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding-top: 16px; /* same as home screen */
+}
+
+.greeting-header {
+  width: 100%;
+  padding: 0 16px 24px 16px;
+  text-align: left;
+}
+
+.greeting-title {
+  font-size: 1.8rem;
+  font-weight: bold;
+  margin: 0;
+  margin-bottom: 8px;
+}
+
+.greeting-subtext {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin: 0;
+  opacity: 0.8;
+}
+
+/* Glass container for user fields */
+.user-info {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  width: 100%;
+  max-width: 1000px;
+  padding: 0 16px; /* matches header left/right */
+}
+
+.user-info ion-item {
+  --background: rgba(255, 255, 255, 0.06);
+  --border-color: rgba(255, 255, 255, 0.2);
+  --box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  --backdrop-filter: blur(8px);
+  --border-radius: 10px;
+  min-height: 40px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  background: var(--background);
+  backdrop-filter: var(--backdrop-filter);
+  -webkit-backdrop-filter: var(--backdrop-filter);
+  box-shadow: var(--box-shadow);
+  transition: all 0.25s ease;
+}
+
+.user-info ion-input {
+  color: #fff;
+  font-size: 1rem;
+  --highlight-color-focused: rgba(255, 255, 255, 0.3);
+  --placeholder-color: rgba(255, 255, 255, 0.4);
+}
+
+.actions {
+  position: fixed;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  align-items: flex-start;
+  flex-wrap: nowrap;
+  width: max-content;
+  z-index: 100;
+}

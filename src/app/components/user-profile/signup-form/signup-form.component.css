@@ -1,0 +1,124 @@
+.main{
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.greeting-header {
+  width: 100%;
+  padding: 0 16px 24px 26px;
+  text-align: left;
+}
+
+.greeting-title {
+  font-size: 1.8rem;
+  font-weight: bold;
+  margin: 0;
+  margin-bottom: 8px;
+}
+
+.greeting-subtext {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin: 0;
+  opacity: 0.8;
+}
+
+.glass-form {
+  width: 90%;
+  margin: 0 auto;
+  transition: all 0.25s ease;
+}
+
+.glass-form ion-item {
+  --background: rgba(255, 255, 255, 0.06);
+  --border-color: rgba(255, 255, 255, 0.2);
+  --box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+  --backdrop-filter: blur(8px);
+  --border-radius: 10px;
+  --padding-start: 10px;
+  --padding-end: 10px;
+  --inner-padding-top: 4px;
+  --inner-padding-bottom: 4px;
+  min-height: 40px;
+
+  border: 1px solid var(--border-color);
+  margin-bottom: 10px;
+  border-radius: var(--border-radius);
+  background: var(--background);
+  backdrop-filter: var(--backdrop-filter);
+  -webkit-backdrop-filter: var(--backdrop-filter);
+  box-shadow: var(--box-shadow);
+
+  transition: all 0.25s ease;
+  transform: translateY(0);
+}
+
+.glass-form ion-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transform: translateY(-2px);
+}
+
+.glass-form ion-item:focus-within {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.4);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
+  transform: scale(0.98);
+}
+
+.glass-form ion-input,
+.glass-form ion-select,
+.glass-form ion-textarea {
+  color: #fff;
+  --highlight-color-focused: rgba(255, 255, 255, 0.3);
+  --placeholder-color: rgba(255, 255, 255, 0.4);
+  --color: #fff;
+  font-size: 1rem;
+  min-height: 36px;
+  padding: 4px 0;
+  transition: color 0.25s ease;
+}
+
+
+.submit{
+  padding-top: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.glass-form ion-item.invalid {
+  --background: rgba(255, 0, 0, 0.12);
+  --border-color: rgba(255, 0, 0, 0.35);
+  --box-shadow: 0 4px 12px rgba(255, 0, 0, 0.25);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border-radius: 12px;
+  transition: all 0.25s ease;
+}
+
+.glass-form ion-item.invalid:hover {
+  --background: rgba(255, 0, 0, 0.25);
+  --border-color: rgba(255, 0, 0, 0.6);
+  --box-shadow: 0 6px 16px rgba(255, 0, 0, 0.45);
+  transform: translateY(-2px);
+}
+
+.glass-form ion-item.invalid:active {
+  transform: scale(0.96);
+  --box-shadow: 0 3px 8px rgba(255, 0, 0, 0.25);
+}
+
+.glass-form ion-item.invalid ion-input,
+.glass-form ion-item.invalid ion-select,
+.glass-form ion-item.invalid ion-textarea {
+  color: #ffaaaa; /* softer red text for invalid input */
+}
+
+

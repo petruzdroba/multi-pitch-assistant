@@ -3,6 +3,7 @@ import { Component, inject, OnDestroy, OnInit, Renderer2 } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { DatabaseService } from './services/database.service';
+import { AuthService } from './services/auth.service';
 
 @Component({
   selector: 'app-root',
@@ -15,6 +16,7 @@ export class AppComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private renderer = inject(Renderer2);
   private db = inject(DatabaseService);
+  private auth = inject(AuthService)
   dbReady = false;
   error: string | null = null;
 
@@ -27,6 +29,8 @@ export class AppComponent implements OnInit, OnDestroy {
         err.message || 'An error occurred while initializing the database.';
       console.error(err);
     }
+
+    this.auth.checkRememberedUser();
 
     window.addEventListener('beforeunload', async () => {
       try {
@@ -46,6 +50,8 @@ export class AppComponent implements OnInit, OnDestroy {
         this.renderer.removeClass(appElement, 'bg-home');
         this.renderer.removeClass(appElement, 'bg-log');
         this.renderer.removeClass(appElement, 'bg-session');
+        this.renderer.removeClass(appElement, 'bg-user');
+
 
         // Add new bg class
         if (event.url.includes('/tabs/home')) {
@@ -57,6 +63,8 @@ export class AppComponent implements OnInit, OnDestroy {
           this.renderer.addClass(appElement, 'bg-log');
         } else if (event.url.includes('/tabs/session')) {
           this.renderer.addClass(appElement, 'bg-session');
+        } else if (event.url.includes('/tabs/user')) {
+          this.renderer.addClass(appElement, 'bg-user');
         } else {
           this.renderer.addClass(appElement, 'bg-home');
           // fallback

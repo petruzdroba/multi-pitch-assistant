@@ -1,0 +1,38 @@
+<div class="main">
+  <div class="greeting-header">
+    <h1 class="greeting-title">Welcome back !</h1>
+    <p class="greeting-subtext">Your adventure awaits</p>
+  </div>
+
+
+  <form class="glass-form" [formGroup]="form" (ngSubmit)="onSubmit()">
+    <div class="email">
+      <ion-item
+        [class.invalid]="form.get('email')?.touched && form.get('email')?.invalid">
+        <ion-input
+          label="Email"
+          type="email"
+          placeholder="john.doe@example.com"
+          formControlName="email"
+        ></ion-input>
+      </ion-item>
+    </div>
+
+    <div class="password">
+      <ion-item
+        [class.invalid]="form.get('password')?.touched && form.get('password')?.invalid">
+        <ion-input
+          label="Password"
+          type="password"
+          [clearInput]="true"
+          formControlName="password"
+          placeholder="********"
+        ></ion-input>
+      </ion-item>
+    </div>
+
+    <div class="submit">
+      <button class="btn-glass" role="button">Log In</button>
+    </div>
+  </form>
+</div>

@@ -1,3 +1,4 @@
+import { UserProfileComponent } from './../components/user-profile/user-profile.component';
 import { Routes } from '@angular/router';
 import { TabsPage } from './tabs.page';
 import { recordingGuard } from '../guards/recording.guard';
@@ -18,6 +19,13 @@ export const routes: Routes = [
         loadComponent: () =>
           import('../components/home-screen/home-screen.component').then(
             (m) => m.HomeScreenComponent
+          ),
+      },
+      {
+        path: 'user',
+        loadComponent: () =>
+          import('../components/user-profile/user-profile.component').then(
+            (m) => m.UserProfileComponent
           ),
       },
       {

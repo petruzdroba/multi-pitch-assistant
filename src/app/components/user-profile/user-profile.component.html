@@ -1,0 +1,28 @@
+<div class="main">
+  @if(!isLoggedIn){
+  <ion-toolbar>
+
+    <ion-segment value="login">
+      <ion-segment-button value="login" content-id="login">
+        <ion-label>Log In</ion-label>
+      </ion-segment-button>
+
+      <ion-segment-button value="signup" content-id="signup">
+        <ion-label>Sign Up</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+
+  </ion-toolbar>
+  <ion-segment-view>
+    <ion-segment-content id="login">
+      <app-login-form />
+    </ion-segment-content>
+    <ion-segment-content id="signup">
+      <app-signup-form />
+    </ion-segment-content>
+  </ion-segment-view>
+  }
+  @else{
+  <app-user-data />
+  }
+</div>

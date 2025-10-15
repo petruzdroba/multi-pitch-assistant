@@ -6,6 +6,31 @@
 
   <!-- <ion-button size="large" fill="outline" class="btn-glass" (click)="onStartSession()">{{loading? "Loading" : "Start
     Climbing"}}</ion-button> -->
-    <button class="btn-glass" role="button" (click)="onStartSession()">{{loading? "Loading" : "Start
-    Climbing"}}</button>
+  <button class="btn-glass" role="button" (click)="onStartSession()">
+    {{
+      loading
+        ? "Loading"
+        : "Start
+    Climbing"
+    }}
+  </button>
+
+  <div class="bottom">
+    <ion-card class="glass-card-static">
+      <ion-card-header>
+        <ion-card-title>Safety Check from the Developer</ion-card-title>
+      </ion-card-header>
+      <ion-card-content>
+        <div class="safety-list">
+          <ul>
+            <li>Always tie in properly.</li>
+            <li>Double-check with a partner.</li>
+            <li>Perform maneuvers safely and by the book.</li>
+            <li>Never take unnecessary risks.</li>
+            <li>Give clear and concise instructions.</li>
+          </ul>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
 </div>
