@@ -27,3 +27,25 @@
   opacity: 0.8;
 
 }
+
+.safety-list ul {
+  margin: 0;
+  padding-left: 20px;
+  list-style-type: disc;
+}
+
+.safety-list li {
+  margin-bottom: 8px;
+}
+
+.bottom{
+  position: fixed;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(95%, 400px);
+  z-index: 100;
+  display: flex;
+  justify-content: center;
+}
+
