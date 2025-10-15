@@ -5,13 +5,14 @@ import {
   HttpInterceptorFn,
 } from '@angular/common/http';
 import { from, Observable, switchMap } from 'rxjs';
-import { Storage } from '@capacitor/storage';
+import { Preferences } from '@capacitor/preferences';
+
 
 export const authInterceptor: HttpInterceptorFn = (
   req: HttpRequest<any>,
   next: HttpHandlerFn
 ): Observable<HttpEvent<any>> => {
-  return from(Storage.get({ key: 'accessToken' })).pipe(
+  return from(Preferences.get({ key: 'accessToken' })).pipe(
     switchMap(({ value: token }) => {
       if (token) {
         const cloned = req.clone({

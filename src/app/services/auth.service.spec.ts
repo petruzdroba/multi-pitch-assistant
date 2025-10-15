@@ -2,7 +2,7 @@ import { TestBed, fakeAsync, tick, flushMicrotasks } from '@angular/core/testing
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { AuthService } from './auth.service';
 import { environment } from 'src/environments/environment.test';
-import { Storage } from '@capacitor/storage';
+import { Preferences } from '@capacitor/preferences';
 import { UserData } from '../models/user-data.interface';
 
 describe('AuthService', () => {
@@ -20,7 +20,7 @@ describe('AuthService', () => {
     refresh: 'mock-refresh-token',
   };
 
-  let storageSpy: jasmine.Spy;
+  let PreferencesSpy: jasmine.Spy;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -31,9 +31,9 @@ describe('AuthService', () => {
     service = TestBed.inject(AuthService);
     httpMock = TestBed.inject(HttpTestingController);
 
-    spyOn(Storage, 'set').and.returnValue(Promise.resolve());
-    storageSpy = spyOn(Storage, 'get').and.returnValue(Promise.resolve({ value: null }));
-    spyOn(Storage, 'remove').and.returnValue(Promise.resolve());
+    spyOn(Preferences, 'set').and.returnValue(Promise.resolve());
+    PreferencesSpy = spyOn(Preferences, 'get').and.returnValue(Promise.resolve({ value: null }));
+    spyOn(Preferences, 'remove').and.returnValue(Promise.resolve());
   });
 
   afterEach(() => {
@@ -50,7 +50,7 @@ describe('AuthService', () => {
         next: (user) => {
           expect(user).toEqual(mockUser);
 
-          // allow async tap() Storage.set calls
+          // allow async tap() Preferences.set calls
           setTimeout(() => {
             expect(service.user()).toEqual(mockUser);
             expect(service.isLoggedIn()).toBe(true);

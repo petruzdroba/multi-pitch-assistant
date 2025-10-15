@@ -3,7 +3,7 @@ import { UserData } from '../models/user-data.interface';
 import { firstValueFrom, map, Observable, take, tap } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment.test';
-import { Storage } from '@capacitor/storage';
+import { Preferences } from '@capacitor/preferences';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -23,9 +23,9 @@ export class AuthService {
       .pipe(
         take(1),
         tap(async (res) => {
-          await Storage.set({ key: 'accessToken', value: res.access });
-          await Storage.set({ key: 'refreshToken', value: res.refresh });
-          await Storage.set({
+          await Preferences.set({ key: 'accessToken', value: res.access });
+          await Preferences.set({ key: 'refreshToken', value: res.refresh });
+          await Preferences.set({
             key: 'cachedUser',
             value: JSON.stringify(res.user),
           });
@@ -48,9 +48,9 @@ export class AuthService {
       .pipe(
         take(1),
         tap(async (res) => {
-          await Storage.set({ key: 'accessToken', value: res.access });
-          await Storage.set({ key: 'refreshToken', value: res.refresh });
-          await Storage.set({
+          await Preferences.set({ key: 'accessToken', value: res.access });
+          await Preferences.set({ key: 'refreshToken', value: res.refresh });
+          await Preferences.set({
             key: 'cachedUser',
             value: JSON.stringify(res.user),
           });
@@ -61,13 +61,13 @@ export class AuthService {
   }
 
   async logOut(): Promise<void> {
-    await Storage.remove({ key: 'accessToken' });
-    await Storage.remove({ key: 'refreshToken' });
+    await Preferences.remove({ key: 'accessToken' });
+    await Preferences.remove({ key: 'refreshToken' });
     this.userData.set(null);
   }
 
   private async handleTokenRefresh(): Promise<void> {
-    const refreshToken = await Storage.get({ key: 'refreshToken' });
+    const refreshToken = await Preferences.get({ key: 'refreshToken' });
 
     if (!refreshToken) {
       this.logOut();
@@ -83,7 +83,7 @@ export class AuthService {
       );
 
       if (response?.access) {
-        await Storage.set({ key: 'accessToken', value: response.access });
+        await Preferences.set({ key: 'accessToken', value: response.access });
       }
     } catch (error) {
       // If refresh token is invalid or expired, log out the user
@@ -93,7 +93,7 @@ export class AuthService {
   }
 
   checkRememberedUser(): void {
-    Storage.get({ key: 'accessToken' }).then(({ value: token }) => {
+    Preferences.get({ key: 'accessToken' }).then(({ value: token }) => {
       if (token) {
         this.http
           .get<{ user: UserData; access: string }>(
@@ -106,13 +106,13 @@ export class AuthService {
           .subscribe({
             next: async (res) => {
               this.userData.set(res.user);
-              await Storage.set({ key: 'accessToken', value: res.access });
+              await Preferences.set({ key: 'accessToken', value: res.access });
             },
             error: async (err) => {
               if (err.status === 401) {
                 await this.handleTokenRefresh();
 
-                const newToken = await Storage.get({ key: 'accessToken' });
+                const newToken = await Preferences.get({ key: 'accessToken' });
                 if (newToken) {
                   this.http
                     .get<{ user: UserData; access: string }>(
@@ -125,7 +125,7 @@ export class AuthService {
                     .subscribe({
                       next: async (res) => {
                         this.userData.set(res.user);
-                        await Storage.set({
+                        await Preferences.set({
                           key: 'accessToken',
                           value: res.access,
                         });
@@ -141,7 +141,7 @@ export class AuthService {
               } else if (err.status === 0) {
                 //No internet connection
                 console.warn('[AuthService] Offline, keeping cached user');
-                const storedUser = await Storage.get({ key: 'cachedUser' });
+                const storedUser = await Preferences.get({ key: 'cachedUser' });
                 if (storedUser.value) {
                   this.userData.set(JSON.parse(storedUser.value));
                 }
