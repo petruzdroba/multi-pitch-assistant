@@ -44,6 +44,28 @@ export class DatabaseService {
     }
   }
 
+  async replaceDatabase(newDB: any): Promise<void> {
+    if (!this.db) throw new Error('Database not initialized');
+
+    try {
+      await this.close();
+
+      await this.sqlite.importFromJson(JSON.stringify(newDB));
+
+      this.db = await this.sqlite.createConnection(
+        this.dbName,
+        false,
+        'no-encryption',
+        1,
+        false
+      );
+      await this.db.open();
+    } catch (err) {
+      console.error('Failed to replace DB', err);
+      throw err;
+    }
+  }
+
   private async createTables(): Promise<void> {
     if (!this.db) throw new Error('Database not initialized');
 

@@ -39,4 +39,32 @@ export class RemoteDatabaseService {
         },
       });
   }
+
+  private decode(base64: string) {
+    try {
+      const jsonStr = atob(base64);
+      const jsonData = JSON.parse(jsonStr);
+
+      return jsonData;
+    } catch (err) {
+      console.error('Failed to decode backup:', err);
+      throw err;
+    }
+  }
+
+  download() {
+    this.http
+      .get<{ sqlite_blob: string; last_sync: string }>(
+        `${environment.serverUrl}/backup/download/`
+      )
+      .pipe(take(1))
+      .subscribe({
+        next: (res) => {
+          const newDB = this.decode(res.sqlite_blob);
+        },
+        error: (err) => {
+          console.error('Download failed ' + err);
+        },
+      });
+  }
 }
