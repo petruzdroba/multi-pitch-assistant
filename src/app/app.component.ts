@@ -4,6 +4,7 @@ import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { DatabaseService } from './services/database.service';
 import { AuthService } from './services/auth.service';
+import { RemoteDatabaseService } from './services/remote-database.service';
 
 @Component({
   selector: 'app-root',
@@ -16,6 +17,7 @@ export class AppComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private renderer = inject(Renderer2);
   private db = inject(DatabaseService);
+  private remoteDb = inject(RemoteDatabaseService)
   private auth = inject(AuthService)
   dbReady = false;
   error: string | null = null;
@@ -24,6 +26,7 @@ export class AppComponent implements OnInit, OnDestroy {
     try {
       await this.db.init();
       this.dbReady = true;
+      this.remoteDb.download();
     } catch (err: any) {
       this.error =
         err.message || 'An error occurred while initializing the database.';

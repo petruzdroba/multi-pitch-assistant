@@ -61,6 +61,7 @@ export class RemoteDatabaseService {
       .subscribe({
         next: (res) => {
           const newDB = this.decode(res.sqlite_blob);
+          this.db.replaceDatabase(newDB);
         },
         error: (err) => {
           console.error('Download failed ' + err);
